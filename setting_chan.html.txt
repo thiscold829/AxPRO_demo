@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AxPRO | Master Setting</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  body { font-family: 'Pretendard', sans-serif; background: #f8fafc; overflow: hidden; display: flex; flex-direction: column; height: 100vh; }
+  .ms { font-family: 'Material Symbols Outlined'; vertical-align: middle; }
+  .tab-btn { padding: 12px 24px; font-weight: 800; font-size: 14px; color: #64748b; border-bottom: 3px solid transparent; transition: 0.2s; }
+  .tab-btn.active { color: #0066cc; border-bottom-color: #0066cc; }
+</style>
+</head>
+<body>
+
+<header class="bg-white border-b border-slate-200 px-6 pt-4 flex justify-between items-end">
+  <div class="flex items-end gap-6">
+    <div class="pb-3">
+      <h1 class="text-xl font-black text-slate-800 tracking-tight">AxPRO Setting</h1>
+      <p class="text-[11px] text-slate-400 font-bold mt-1">조직 및 과제 DB 관리</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="tab-btn active" onclick="switchTab('member', this)"><span class="ms mr-1 text-[18px]">group</span> 구성원 관리</button>
+      <button class="tab-btn" onclick="switchTab('project', this)"><span class="ms mr-1 text-[18px]">folder_special</span> 과제 관리</button>
+    </div>
+  </div>
+  <a href="axpro.html" class="mb-3 flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-slate-700 transition">
+    <span class="ms">dashboard</span> 대시보드로 돌아가기
+  </a>
+</header>
+
+<main class="flex-1 w-full bg-slate-50 relative">
+  <iframe id="frameArea" src="member.html?embed=true" class="w-full h-full border-none absolute inset-0"></iframe>
+</main>
+
+<script>
+  function switchTab(type, element) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    element.classList.add('active');
+    // 로드할 파일명 (상황에 맞게 파일명 수정 필요)
+    const src = type === 'member' ? 'member.html?embed=true' : 'project.html?embed=true';
+    document.getElementById('frameArea').src = src;
+  }
+</script>
+</body>
+</html>

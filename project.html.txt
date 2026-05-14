@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>과제 관리 - STACKNOTE ONE</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css"/>
+<script src="config.js"></script>
+<style>
+:root {
+  --ink: #111827; --ink-soft: #475569; --ink-mute: #94a3b8;
+  --bg-gradient: radial-gradient(1200px 800px at 50% 0%, #ffffff 0%, #f1f5f9 100%);
+  --pool-inner: rgba(226, 232, 240, 0.45);
+}
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Pretendard', -apple-system, sans-serif; color: var(--ink);
+  -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; background: var(--bg-gradient);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.015 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.ms { font-family: 'Material Symbols Outlined'; font-weight: normal; font-style: normal; display: inline-block; vertical-align: middle; line-height: 1; }
+
+/* Navigation */
+.nav { height: 56px; background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(30px); border-bottom: 1px solid rgba(0,0,0,0.05); z-index: 100; display: flex; align-items: center; padding: 0 32px; justify-content: space-between;}
+.nav-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 700; color: var(--ink-soft); cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: 0.2s; text-decoration: none; }
+.nav-btn:hover { background: rgba(0,0,0,0.05); color: var(--ink); }
+
+.btn-save-manual {
+  display: flex; align-items: center; gap: 8px; background: var(--ink); color: #fff;
+  padding: 8px 18px; border-radius: 99px; font-size: 12px; font-weight: 800; cursor: pointer; border: none; transition: 0.3s;
+}
+.btn-save-manual:hover { transform: translateY(-1px); background: #334155; }
+
+/* Workspace & Input Dock */
+/* [수술 1] 스크롤 무한 확장 방지: min-height: 0 추가 */
+.workspace { flex: 1; display: flex; flex-direction: column; max-width: 1400px; margin: 0 auto; width: 100%; padding: 24px 40px 40px; min-height: 0; }
+
+.input-dock {
+  background: #ffffff; border-radius: 20px; padding: 10px 14px; margin-bottom: 24px;
+  box-shadow: 0 10px 30px -10px rgba(15,23,42,0.08), inset 0 1px 0 #fff;
+  border: 1px solid rgba(0,0,0,0.05); display: flex; align-items: center; gap: 10px;
+}
+.inp-base { background: #f1f5f9; border-radius: 10px; border: 1px solid transparent; padding: 8px 10px; font-size: 12px; font-weight: 800; color: var(--ink); outline: none; transition: 0.2s; text-align: center; }
+.inp-base:focus { background: #fff; border-color: var(--ink-mute); }
+
+/* List Table */
+.list-pool { 
+  flex: 1; background: var(--pool-inner); border-radius: 32px; padding: 24px; overflow-y: auto; 
+  box-shadow: inset 0 12px 24px -8px rgba(15,23,42,0.12), inset 0 2px 4px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0,0,0,0.02);
+}
+.list-pool::-webkit-scrollbar { display: none; }
+
+.project-card {
+  background: #ffffff; border-radius: 16px; padding: 12px 20px; margin-bottom: 8px;
+  display: grid; grid-template-columns: 60px 100px 1fr 120px 100px 90px 40px; align-items: center; gap: 12px;
+  box-shadow: 0 4px 10px -2px rgba(15,23,42,0.04); border: 1px solid rgba(0,0,0,0.02);
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.3, 1); cursor: pointer;
+}
+.project-card:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -8px rgba(15,23,42,0.1); }
+
+/* [수정] 상태표시 디자인 (도트 중심) */
+.st-badge { font-size: 11px; font-weight: 900; display: flex; align-items: center; gap: 6px; justify-content: center; padding: 4px 0; border-radius: 8px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; }
+.st-제안 { background: #FFE5A0; color: #655536; } .st-제안 .dot { background: #655536; box-shadow: 0 0 6px #655536; }
+.st-진행 { background: #D4EDBC; color: #1C7A52; } .st-진행 .dot { background: #1C7A52; box-shadow: 0 0 6px #1C7A52; }
+.st-완료 { background: #E6E6E6; color: #4A4A4A; } .st-완료 .dot { background: #4A4A4A; box-shadow: 0 0 6px #4A4A4A; }
+.st-기타 { background: #BFE1F6; color: #034EA5; } .st-기타 .dot { background: #034EA5; box-shadow: 0 0 6px #034EA5; }
+.st-문제발생 { background: #FFCFC9; color: #BC2221; } .st-문제발생 .dot { background: #BC2221; box-shadow: 0 0 6px #BC2221; }
+
+/* [수정] 수정 모달 디자인 및 라벨 추가 */
+.overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.15); backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center; }
+.overlay.active { display: flex; }
+.modal-box { background: #fff; width: 480px; border-radius: 28px; box-shadow: 0 40px 80px -20px rgba(0,0,0,0.2); padding: 32px; position: relative; }
+.modal-close-btn { position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; border-radius: 50%; background: #f8fafc; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+.modal-close-btn:hover { background: #f1f5f9; color: #ef4444; }
+
+.field-group { margin-bottom: 16px; }
+.field-label { display: block; font-size: 10px; font-weight: 800; color: var(--ink-mute); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; margin-left: 4px; }
+.modal-inp { width: 100%; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; font-size: 14px; font-weight: 700; outline: none; transition: 0.2s; }
+.modal-inp:focus { background: #fff; border-color: var(--ink-soft); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+
+/* Status Button Sync */
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #e2e8f0; margin-right: 8px; }
+.sync-dot.syncing { background: #3b82f6; animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.animate-spin { animation: spin 1s linear infinite; display: inline-block; }
+
+/* Embed mode */
+body.embed .nav { display: none; }
+body.embed .workspace { padding-top: 20px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="https://thiscold829.github.io/StackNoteOne/" class="nav-btn"><span class="ms text-[20px]">arrow_back</span> 허브로 돌아가기</a>
+</nav>
+
+<main class="workspace">
+  <div class="input-dock">
+    <input type="text" id="inId" class="inp-base w-[70px]" placeholder="ID" tabindex="1">
+    <input type="text" id="inShort" class="inp-base w-[100px]" placeholder="약어" tabindex="2">
+    <input type="text" id="inFull" class="inp-base flex-1 !text-left" placeholder="정식 과제 명칭" tabindex="3">
+    <input type="text" id="inTeam" class="inp-base w-[120px]" placeholder="담당 팀" tabindex="4">
+    <input type="text" id="inManager" class="inp-base w-[100px]" placeholder="담당자" tabindex="5">
+    <select id="inStatus" class="inp-base w-[100px] cursor-pointer" tabindex="6">
+      <option value="제안">제안</option>
+      <option value="진행">진행</option>
+      <option value="완료">완료</option>
+      <option value="기타">기타</option>
+      <option value="문제발생">문제발생</option>
+    </select>
+    <button class="btn-add" onclick="addProject()" title="추가" tabindex="7"><span class="ms">add</span></button>
+    <button class="btn-save-manual" id="saveBtn" onclick="forceManualSave()" style="flex-shrink:0;">
+      <span class="ms text-[18px]" id="syncIcon">cloud_upload</span>
+      <span id="syncText">DB 업로드</span>
+    </button>
+  </div>
+
+  <div class="list-pool" id="listPool"></div>
+</main>
+
+<div class="overlay" id="editModal">
+  <div class="modal-box">
+    <div class="modal-close-btn" onclick="closeEdit()"><span class="ms text-[20px]">close</span></div>
+    <h3 class="text-[14px] font-black tracking-widest text-slate-400 mb-8 uppercase">Project Details</h3>
+    
+    <input type="hidden" id="edIdx">
+    
+    <div class="flex gap-4">
+      <div class="field-group w-[100px]">
+        <label class="field-label">ID</label>
+        <input type="text" id="edId" class="modal-inp text-center">
+      </div>
+      <div class="field-group flex-1">
+        <label class="field-label">Search Keyword (약어)</label>
+        <input type="text" id="edShort" class="modal-inp font-black">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Official Name (정식 명칭)</label>
+      <input type="text" id="edFull" class="modal-inp">
+    </div>
+
+    <div class="flex gap-4">
+      <div class="field-group flex-1">
+        <label class="field-label">Team</label>
+        <input type="text" id="edTeam" class="modal-inp">
+      </div>
+      <div class="field-group flex-1">
+        <label class="field-label">Manager</label>
+        <input type="text" id="edManager" class="modal-inp">
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label class="field-label">Project Status</label>
+      <select id="edStatus" class="modal-inp cursor-pointer">
+      <option value="제안">제안</option>
+      <option value="진행">진행</option>
+      <option value="완료">완료</option>
+      <option value="기타">기타</option>
+      <option value="문제발생">문제발생</option>
+      </select>
+    </div>
+
+    <div class="flex justify-between items-center mt-6">
+      <button onclick="deleteProject()" class="text-rose-500 font-bold text-[13px] hover:bg-rose-50 px-4 py-2 rounded-lg transition">삭제</button>
+      <button onclick="saveEdit()" class="bg-slate-900 text-white font-bold text-[13px] px-10 py-3 rounded-xl hover:bg-slate-800 shadow-lg transition">변경사항 적용</button>
+    </div>
+  </div>
+</div>
+
+<form id="hidden_form" target="hidden_iframe" method="POST" style="display:none;"><input type="hidden" name="payload" id="payload_input"></form>
+<iframe name="hidden_iframe" style="display:none;" onload="if(window.isSaving) onSaveSuccess();"></iframe>
+
+<script>
+// [수술 3] config.js 연동
+const S_ID  = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '';
+const A_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL)  ? CONFIG.API_URL  : '';
+const isEmbed = new URLSearchParams(location.search).has('embed');
+if(isEmbed) document.body.classList.add('embed');
+
+let projects = [];
+
+window.onload = async () => {
+  try {
+    const res = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&sheet=projects`);
+    const txt = await res.text();
+    projects = parseCSV(txt) || [];
+    renderProjects();
+  } catch(e) { console.error(e); }
+};
+
+function parseCSV(t){
+  const lines=t.trim().split('\n'); if(lines.length<2) return [];
+  const hdrs=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+  return lines.slice(1).map(l=>{
+    const v=[]; let c='', q=false;
+    for(let i=0; i<l.length; i++){ const ch=l[i]; if(ch==='"') q=!q; else if(ch===','&&!q){v.push(c.trim());c='';} else c+=ch; }
+    v.push(c.trim()); const o={}; hdrs.forEach((h,i)=>o[h]=(v[i]||'').replace(/^"|"$/g,'')); return o;
+  });
+}
+
+function renderProjects() {
+  const pool = document.getElementById('listPool');
+  if(!projects.length) { pool.innerHTML = `<div class="text-center text-slate-400 font-bold mt-12 opacity-60">과제 데이터가 없습니다.</div>`; return; }
+
+  projects.sort((a,b) => (Number(a.order)||999) - (Number(b.order)||999));
+
+  pool.innerHTML = projects.map((p, idx) => `
+    <div class="project-card" onclick="openEdit(${idx})">
+      <div class="font-['Space_Grotesk'] text-[11px] font-bold text-slate-400 text-center">${p.id}</div>
+      <div class="font-black text-[10px] bg-slate-900 text-white px-2 py-1 rounded-md text-center w-fit mx-auto">${p.short_name}</div>
+      <div class="text-[14px] font-bold text-slate-700 truncate">${p.full_name}</div>
+      <div class="text-[12px] font-bold text-slate-400">${p.team}</div>
+      <div class="text-[12px] font-bold text-slate-500">${p.manager}</div>
+      <div class="st-badge st-${p.status}"><div class="dot"></div>${p.status}</div>
+      <div class="text-right opacity-20"><span class="ms text-[18px]">edit_note</span></div>
+    </div>
+  `).join('');
+}
+
+function commitToCloud() {
+  if(window.isSaving) return;
+  const payload = { action: 'write', sheetName: 'projects', data: projects.map((p, i) => ({ ...p, order: i + 1 })) };
+  document.getElementById('payload_input').value = JSON.stringify(payload);
+  window.isSaving = true;
+  document.getElementById('syncIcon').textContent = 'sync';
+  document.getElementById('syncIcon').classList.add('animate-spin');
+  document.getElementById('syncText').textContent = '동기화 중...';
+  document.getElementById('hidden_form').action = A_URL;
+  document.getElementById('hidden_form').submit();
+}
+
+function onSaveSuccess() {
+  window.isSaving = false;
+  document.getElementById('syncIcon').textContent = 'cloud_upload';
+  document.getElementById('syncIcon').classList.remove('animate-spin');
+  document.getElementById('syncText').textContent = 'DB 업로드';
+}
+
+function forceManualSave() { commitToCloud(); }
+
+function addProject() {
+  const short = document.getElementById('inShort').value.trim();
+  const full = document.getElementById('inFull').value.trim();
+  if(!short || !full) return;
+
+  projects.push({
+    id: document.getElementById('inId').value.trim() || 'P' + Date.now().toString().slice(-4),
+    short_name: short,
+    full_name: full,
+    team: document.getElementById('inTeam').value.trim(),
+    manager: document.getElementById('inManager').value.trim(),
+    status: document.getElementById('inStatus').value,
+    order: projects.length + 1
+  });
+
+  ['inId', 'inShort', 'inFull', 'inTeam', 'inManager'].forEach(id => document.getElementById(id).value = '');
+  renderProjects(); commitToCloud();
+}
+
+function openEdit(idx) {
+  const p = projects[idx];
+  document.getElementById('edIdx').value = idx;
+  document.getElementById('edId').value = p.id;
+  document.getElementById('edShort').value = p.short_name;
+  document.getElementById('edFull').value = p.full_name;
+  document.getElementById('edTeam').value = p.team;
+  document.getElementById('edManager').value = p.manager;
+  document.getElementById('edStatus').value = p.status;
+  document.getElementById('editModal').classList.add('active');
+}
+
+function closeEdit() { document.getElementById('editModal').classList.remove('active'); }
+
+function saveEdit() {
+  /* [수술 2] Number() 처리로 배열 파괴 방지 */
+  const idx = Number(document.getElementById('edIdx').value);
+  projects[idx] = {
+    id: document.getElementById('edId').value,
+    short_name: document.getElementById('edShort').value,
+    full_name: document.getElementById('edFull').value,
+    team: document.getElementById('edTeam').value,
+    manager: document.getElementById('edManager').value,
+    status: document.getElementById('edStatus').value,
+    order: idx + 1
+  };
+  closeEdit(); renderProjects(); commitToCloud();
+}
+
+function deleteProject() {
+  if(confirm("이 과제 리스트를 삭제하시겠습니까?")) {
+    /* [수술 2] Number() 처리로 배열 파괴 방지 */
+    const idx = Number(document.getElementById('edIdx').value);
+    projects.splice(idx, 1);
+    closeEdit(); renderProjects(); commitToCloud();
+  }
+}
+</script>
+</body>
+</html>
