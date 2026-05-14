@@ -108,20 +108,21 @@
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-y-2 gap-x-3 min-h-[34px] pb-1" id="filterArea2">
-      <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
-        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 주관</span>
-        <div class="flex gap-1.5" id="projectTeamFilters">
-          <button class="chip chip-filter" onclick="setFilter('projectTeam', '전체', this)">전체</button>
-          <button class="chip chip-filter" onclick="setFilter('projectTeam', '식품AX', this)">식품AX</button>
-          <button class="chip chip-filter" onclick="setFilter('projectTeam', '환경AX', this)">환경AX</button>
+    <div class="flex flex-col gap-2 pb-1" id="filterArea2">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
+          <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 주관</span>
+          <div class="flex gap-1.5" id="projectTeamFilters">
+            <button class="chip chip-filter" onclick="setFilter('projectTeam', '전체', this)">전체</button>
+            <button class="chip chip-filter" onclick="setFilter('projectTeam', '식품AX', this)">식품AX</button>
+            <button class="chip chip-filter" onclick="setFilter('projectTeam', '환경AX', this)">환경AX</button>
+          </div>
+        </div>
+        <div class="flex flex-col shrink-0 justify-center">
+          <button id="btnToggleProjects" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded font-bold transition" onclick="toggleAllProjects()">전체 해제</button>
         </div>
       </div>
-      <div class="flex flex-col shrink-0 justify-center mr-2">
-        <button id="btnToggleProjects" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded font-bold transition" onclick="toggleAllProjects()">전체 해제</button>
-      </div>
-      <div class="flex flex-wrap gap-2 shrink-0 items-center mt-1" id="projectFilters">
-        </div>
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" style="-webkit-overflow-scrolling:touch;" id="projectFilters"></div>
     </div>
 
   </div>
