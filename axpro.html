@@ -179,7 +179,7 @@
   const S_ID = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '';
   const A_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : '';
 
-  // --- 권한 및 초기 상태 파악 ---
+  // --- 1. 권한 파악 ---
   const userStr = sessionStorage.getItem('axUser');
   if(!userStr) { alert("로그인이 필요합니다."); location.replace('index.html'); }
   const currentUser = JSON.parse(userStr);
@@ -189,14 +189,12 @@
   const isManager = currentUser.rank && (currentUser.rank.includes('팀장') || currentUser.rank.includes('실장') || currentUser.rank.includes('사장') || currentUser.rank.includes('본부장'));
   const isRegularAxMember = isAxTeam && !isManager;
 
-  // 유저 소속팀 키워드 추출 (식품 or 환경)
   let userTeamKeyword = '';
   if (currentUser.dept && currentUser.dept.includes('식품')) userTeamKeyword = '식품';
   else if (currentUser.dept && currentUser.dept.includes('환경')) userTeamKeyword = '환경';
 
   let rawData = { members: [], projects: [], tasks: [] };
   
-  // ✨ 매크로 vs 마이크로 뷰 초기화
   let filters = { 
     memberTeam: isRegularAxMember && userTeamKeyword ? userTeamKeyword + 'AX' : '전체', 
     projectTeam: isRegularAxMember && userTeamKeyword ? userTeamKeyword + 'AX' : '전체', 
@@ -214,9 +212,9 @@
       fetchData('tasks').then(d => rawData.tasks = d)
     ]);
     
-    applySmartSorting(); // 내 팀 데이터 상단 정렬
-    initFilterUI();      // UI 버튼 및 인풋에 필터값 반영
-    applyRoleBasedUI();  // 입력/수정 권한 잠금
+    applySmartSorting(); 
+    initFilterUI();      
+    applyRoleBasedUI();  
     
     populateProjectDatalist();
     updateMemberDatalist(); 
@@ -224,9 +222,8 @@
     renderBoard();
   };
 
-  // ✨ 드롭다운 목록 '내 팀' 최상단 정렬 로직 (스마트 소팅)
   function applySmartSorting() {
-    if(!userTeamKeyword) return; // 소속팀이 불분명하면 정렬 안함
+    if(!userTeamKeyword) return; 
 
     rawData.members.sort((a, b) => {
       const aIsMyTeam = a.dept && a.dept.includes(userTeamKeyword);
@@ -245,7 +242,6 @@
     });
   }
 
-  // ✨ 초기 필터 상태를 버튼(Chip)의 active 클래스로 시각화
   function initFilterUI() {
     document.querySelectorAll('#memberTeamFilters .chip').forEach(c => { c.classList.toggle('active', c.textContent === filters.memberTeam); });
     document.querySelectorAll('#projectTeamFilters .chip').forEach(c => { c.classList.toggle('active', c.textContent === filters.projectTeam); });
@@ -253,7 +249,6 @@
     document.getElementById('memberFilter').value = filters.member !== '전체' ? filters.member : '';
   }
 
-  // ✨ 일반 팀원 권한 제어 (신규 등록 폼 잠금)
   function applyRoleBasedUI() {
     const elInMember = document.getElementById('inMember');
     if(isRegularAxMember) {
@@ -265,7 +260,6 @@
 
   function handleLogout() { sessionStorage.removeItem('axUser'); location.replace('index.html'); }
 
-  // --- 기존 통신 파싱 로직 ---
   async function fetchData(sheetName) {
     try {
       const res = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}`);
@@ -282,19 +276,26 @@
     }).filter(row => Object.values(row).some(val => val !== '')); 
   }
 
-  // --- 분리된 필터 로직 ---
   function populateProjectDatalist() {
     const projHTML = rawData.projects.map(p => `<option value="${p.short_name}">`).join('');
     document.getElementById('dlProjects').innerHTML = projHTML;
   }
 
+  // --- V4.1 수정됨: 멤버 필터 제한 해제 및 정렬 ---
   function updateMemberDatalist() {
-    let targetMembers = rawData.members.filter(m => m.dept && (m.dept.includes('식품') || m.dept.includes('환경')));
-    if (filters.memberTeam !== '전체') {
-      const teamKeyword = filters.memberTeam.replace('AX', '').trim();
-      targetMembers = targetMembers.filter(m => m.dept && m.dept.includes(teamKeyword));
-    }
-    const memHTML = targetMembers.map(m => `<option value="${m.name}">`).join('');
+    let allValidMembers = rawData.members.filter(m => m.dept && (m.dept.includes('식품') || m.dept.includes('환경')));
+    
+    const prioritizeTeam = filters.memberTeam !== '전체' ? filters.memberTeam.replace('AX', '').trim() : userTeamKeyword;
+    
+    allValidMembers.sort((a, b) => {
+      const aIsPriority = prioritizeTeam && a.dept && a.dept.includes(prioritizeTeam);
+      const bIsPriority = prioritizeTeam && b.dept && b.dept.includes(prioritizeTeam);
+      if (aIsPriority && !bIsPriority) return -1;
+      if (!aIsPriority && bIsPriority) return 1;
+      return 0; 
+    });
+
+    const memHTML = allValidMembers.map(m => `<option value="${m.name}">`).join('');
     document.getElementById('dlMembers').innerHTML = memHTML;       
     document.getElementById('dlMembersFilter').innerHTML = memHTML; 
   }
@@ -302,7 +303,6 @@
   function setFilter(type, value, btnElement) {
     filters[type] = value;
     
-    // 버튼 클릭에 의한 호출일 경우 active 클래스 교체
     if(btnElement) {
       btnElement.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       btnElement.classList.add('active');
@@ -319,9 +319,23 @@
     renderBoard();
   }
 
+  // --- V4.1 수정됨: 현재 1층 필터 조건에 맞는 업무만 추려내는 헬퍼 함수 ---
+  function getActiveTasksForChips() {
+    return rawData.tasks.filter(t => {
+      if(filters.period !== '전체' && t.period !== filters.period) return false;
+      if(filters.member !== '전체' && filters.member !== '' && t.member_name !== filters.member) return false;
+      if(filters.memberTeam !== '전체') {
+        const memberInfo = rawData.members.find(m => m.name === t.member_name);
+        if(!memberInfo || !memberInfo.dept || !memberInfo.dept.includes(filters.memberTeam.replace('AX', ''))) return false;
+      }
+      return true;
+    });
+  }
+
   function toggleAllProjects() {
     const targetProjs = filters.projectTeam === '전체' ? rawData.projects : rawData.projects.filter(p => p.team === filters.projectTeam);
-    const selectableProjs = targetProjs.filter(p => rawData.tasks.some(t => t.project_short === p.short_name));
+    const activeTasks = getActiveTasksForChips();
+    const selectableProjs = targetProjs.filter(p => activeTasks.some(t => t.project_short === p.short_name));
     
     if (filters.selectedProjects.size === selectableProjs.length && selectableProjs.length > 0) {
       filters.selectedProjects.clear();
@@ -340,9 +354,11 @@
     renderProjectChipsUI(); renderBoard();
   }
 
+  // --- V4.1 수정됨: 내용 없는 사업 칩 비활성화 ---
   function renderProjectChipsUI() {
     const targetProjs = filters.projectTeam === '전체' ? rawData.projects : rawData.projects.filter(p => p.team === filters.projectTeam);
-    const selectableProjs = targetProjs.filter(p => rawData.tasks.some(t => t.project_short === p.short_name));
+    const activeTasks = getActiveTasksForChips();
+    const selectableProjs = targetProjs.filter(p => activeTasks.some(t => t.project_short === p.short_name));
     
     const btnToggle = document.getElementById('btnToggleProjects');
     if (selectableProjs.length === 0) {
@@ -360,9 +376,9 @@
     }
 
     document.getElementById('projectFilters').innerHTML = targetProjs.map(p => {
-      const taskCount = rawData.tasks.filter(t => t.project_short === p.short_name).length;
+      const taskCount = activeTasks.filter(t => t.project_short === p.short_name).length;
       if (taskCount === 0) {
-        return `<button class="chip chip-multi opacity-40 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400" title="등록된 업무 없음">${p.short_name}</button>`;
+        return `<button class="chip chip-multi opacity-40 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400" title="해당 조건에 등록된 업무 없음">${p.short_name}</button>`;
       } else {
         const isSelected = filters.selectedProjects.has(p.short_name);
         return `<button class="chip chip-multi ${isSelected ? 'selected' : ''}" onclick="toggleProjectChip('${p.short_name}', this)">
@@ -375,30 +391,30 @@
   function updateProjectChips() {
     filters.selectedProjects.clear();
     const targetProjs = filters.projectTeam === '전체' ? rawData.projects : rawData.projects.filter(p => p.team === filters.projectTeam);
+    const activeTasks = getActiveTasksForChips();
+    
     targetProjs.forEach(p => {
-      const taskCount = rawData.tasks.filter(t => t.project_short === p.short_name).length;
+      const taskCount = activeTasks.filter(t => t.project_short === p.short_name).length;
       if (taskCount > 0) filters.selectedProjects.add(p.short_name);
     });
     renderProjectChipsUI();
   }
 
-  // --- 메인 보드 렌더링 ---
+  // --- V4.1 수정됨: 내용 없는 빈 사업 섹션(카드) 렌더링 삭제 ---
   function renderBoard() {
     const container = document.getElementById('boardContainer');
+    
+    const mVal = isRegularAxMember ? currentUser.name : document.getElementById('memberFilter').value.trim();
+    filters.member = mVal === '' ? '전체' : mVal;
 
     const filteredTasks = rawData.tasks.filter(t => {
-      // 기간 조건
       if(filters.period !== '전체' && t.period !== filters.period) return false;
-      // 멤버 조건 (이름 입력창)
       if(filters.member !== '전체' && filters.member !== '' && t.member_name !== filters.member) return false;
-      // 멤버 팀 조건 (크로스오버 체크를 위해, 해당 과제를 한 멤버가 그 팀 소속인지 확인)
       if(filters.memberTeam !== '전체') {
         const memberInfo = rawData.members.find(m => m.name === t.member_name);
         if(!memberInfo || !memberInfo.dept || !memberInfo.dept.includes(filters.memberTeam.replace('AX', ''))) return false;
       }
-      // 사업 주관팀 및 사업 칩 조건
       if(filters.selectedProjects.size > 0 && !filters.selectedProjects.has(t.project_short)) return false;
-      
       return true;
     });
 
@@ -406,12 +422,14 @@
     filters.selectedProjects.forEach(proj => grouped[proj] = []); 
     filteredTasks.forEach(t => { if(grouped[t.project_short] !== undefined) grouped[t.project_short].push(t); });
 
-    if(Object.keys(grouped).length === 0) {
+    const activeProjects = Object.keys(grouped).filter(proj => grouped[proj].length > 0);
+
+    if(activeProjects.length === 0) {
       container.innerHTML = `<div class="text-center text-slate-400 font-bold mt-24 opacity-50 text-[14px]">해당 조건에 부합하는 과제 및 업무가 없습니다.</div>`;
       return;
     }
 
-    container.innerHTML = Object.keys(grouped).map(projName => {
+    container.innerHTML = activeProjects.map(projName => {
       const projInfo = rawData.projects.find(p => p.short_name === projName) || {};
       const tList = grouped[projName];
       const dailyTasks = tList.filter(t => t.period === '일간');
@@ -438,7 +456,6 @@
     }).join('');
   }
 
-  // ✨ 업무 카드 렌더링 및 권한별 클릭 제어
   function generateTaskCard(t) {
     const pColor = t.priority === '상' ? 'text-rose-600 bg-rose-50' : (t.priority === '중' ? 'text-slate-500 bg-slate-100' : 'text-slate-400 bg-slate-50');
     let sColor = 'text-slate-600 bg-slate-50';
@@ -447,7 +464,6 @@
     else if(t.status === '문제발생') sColor = 'text-rose-600 bg-rose-50';
     else if(t.status === '완료') sColor = 'text-slate-400 bg-slate-100 line-through';
     
-    // 권한 검사 (관리자이거나, 작성자가 본인이면 수정 가능)
     const canEdit = isManager || t.member_name === currentUser.name;
     const onClickAction = canEdit ? `openEditModal('${t.id}')` : `alert('열람 전용입니다. 타인의 업무는 수정/삭제할 수 없습니다.')`;
     const cardClass = canEdit ? 'editable' : 'readonly';
@@ -476,7 +492,6 @@
 
   function addTask() {
     const proj = document.getElementById('inProject').value.trim();
-    // 신규 등록 시 일반 팀원은 입력창이 잠겨있으므로 본인 이름 강제, 관리자는 입력값 존중
     const mem = isRegularAxMember ? currentUser.name : document.getElementById('inMember').value.trim();
     const task = document.getElementById('inTask').value.trim();
     
@@ -513,7 +528,6 @@
     document.getElementById('edProgress').value = t.progress || 0;
     document.getElementById('edPriority').value = t.priority || '중';
 
-    // 수정 모달창에서도 일반 팀원이 담당자를 남의 이름으로 바꾸는 것 방지
     const elEdMember = document.getElementById('edMember');
     if(isRegularAxMember) {
       elEdMember.disabled = true;
@@ -529,7 +543,6 @@
     const id = document.getElementById('edId').value;
     const idx = rawData.tasks.findIndex(x => x.id === id);
     if(idx > -1) {
-      // 일반 팀원일 경우 악의적 담당자 조작 방지를 위해 기존 담당자 이름 유지
       const finalMemberName = isRegularAxMember ? rawData.tasks[idx].member_name : document.getElementById('edMember').value;
 
       rawData.tasks[idx] = {
