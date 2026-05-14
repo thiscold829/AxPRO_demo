@@ -68,7 +68,7 @@
 
   <div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-3 flex flex-col gap-3">
     
-    <div class="flex items-center gap-5 overflow-x-auto pb-1 scrollbar-hide border-b border-slate-100/50 pb-3" id="filterArea1">
+    <div class="flex flex-wrap items-center gap-y-3 gap-x-5 border-b border-slate-100/50 pb-3" id="filterArea1">
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">담당 조직</span>
         <div class="flex gap-1.5" id="memberTeamFilters">
@@ -77,7 +77,7 @@
           <button class="chip chip-filter" onclick="setFilter('memberTeam', '환경AX', this)">환경AX</button>
         </div>
       </div>
-      <div class="w-[1px] h-4 bg-slate-200 shrink-0"></div>
+      <div class="w-[1px] h-4 bg-slate-200 shrink-0 hidden sm:block"></div>
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">담당자 검색</span>
         
@@ -95,7 +95,7 @@
         </div>
 
       </div>
-      <div class="w-[1px] h-4 bg-slate-200 shrink-0"></div>
+      <div class="w-[1px] h-4 bg-slate-200 shrink-0 hidden sm:block"></div>
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Period</span>
         <div class="flex gap-1.5" id="periodFilters">
@@ -106,7 +106,7 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-3 overflow-x-auto pb-1 min-h-[34px] scrollbar-hide" id="filterArea2">
+    <div class="flex flex-wrap items-center gap-y-2 gap-x-3 min-h-[34px] pb-1" id="filterArea2">
       <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 주관</span>
         <div class="flex gap-1.5" id="projectTeamFilters">
@@ -118,7 +118,7 @@
       <div class="flex flex-col shrink-0 justify-center mr-2">
         <button id="btnToggleProjects" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded font-bold transition" onclick="toggleAllProjects()">전체 해제</button>
       </div>
-      <div class="flex gap-2 shrink-0 items-center mt-1" id="projectFilters">
+      <div class="flex flex-wrap gap-2 shrink-0 items-center mt-1" id="projectFilters">
         </div>
     </div>
 
@@ -239,7 +239,6 @@
   const S_ID = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '';
   const A_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : '';
 
-  // --- 1. 권한 파악 ---
   const userStr = sessionStorage.getItem('axUser');
   if(!userStr) { alert("로그인이 필요합니다."); location.replace('index.html'); }
   const currentUser = JSON.parse(userStr);
@@ -264,7 +263,6 @@
   };
   let isDockOpen = false;
 
-  // ✨ 커스텀 드롭다운 선택값 저장소
   let cv = { memberFilter: '', inProject: '', inMember: '', edProject: '', edMember: '' };
 
   window.onload = async () => {
@@ -287,7 +285,6 @@
     renderBoard();
   };
 
-  // --- ✨ 커스텀 드롭다운 UI 제어 로직 ---
   function toggleDropdown(id) {
     const wrapper = document.getElementById(`wrapper-${id}`);
     if (wrapper.classList.contains('disabled-dropdown')) return;
@@ -315,7 +312,6 @@
 
     document.getElementById(`drop-${id}`).classList.add('hidden');
     
-    // 헤더 멤버 필터 클릭 시 동작 연동
     if (id === 'memberFilter') {
       filters.member = value === '' ? '전체' : value;
       updateProjectChips();
@@ -337,7 +333,6 @@
       document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
     }
   });
-  // ------------------------------------
 
   function applySmartSorting() {
     if(!userTeamKeyword) return; 
@@ -364,7 +359,6 @@
     document.querySelectorAll('#projectTeamFilters .chip').forEach(c => { c.classList.toggle('active', c.textContent === filters.projectTeam); });
     document.querySelectorAll('#periodFilters .chip').forEach(c => { c.classList.toggle('active', c.textContent === filters.period); });
     
-    // 초기 멤버 세팅 (팀원이면 본인 이름)
     if(filters.member !== '전체') {
       selectOption('memberFilter', filters.member, filters.member);
     } else {
@@ -374,10 +368,8 @@
 
   function applyRoleBasedUI() {
     if(isRegularAxMember) {
-      // 일반 팀원이면 담당자 선택 드롭다운 잠금 및 내 이름 세팅
       selectOption('inMember', currentUser.name, currentUser.name);
       document.getElementById('wrapper-inMember').classList.add('disabled-dropdown');
-      // 수정 모달창(edMember) 잠금은 openEditModal 함수에서 처리됨
     }
   }
 
@@ -399,7 +391,6 @@
     }).filter(row => Object.values(row).some(val => val !== '')); 
   }
 
-  // --- ✨ V4.2 + 커스텀 드롭다운 병합: 프로젝트 옵션 렌더링 ---
   function renderProjectDropdowns() {
     const html = rawData.projects.map(p => `<div class="px-3 py-2 hover:bg-blue-50 cursor-pointer text-[13px] text-slate-700 font-medium border-b border-slate-50 last:border-0" onclick="selectOption('__ID__', '${p.short_name}', '${p.short_name}')">${p.short_name}</div>`).join('');
     
@@ -407,7 +398,6 @@
     document.getElementById('opts-edProject').innerHTML = html.replace(/__ID__/g, 'edProject');
   }
 
-  // --- ✨ V4.2 + 커스텀 드롭다운 병합: 멤버 제한 해제, 정렬 적용, 커스텀 옵션 렌더링 ---
   function renderMemberDropdowns() {
     let allValidMembers = rawData.members.filter(m => m.dept && (m.dept.includes('식품') || m.dept.includes('환경')));
     
@@ -439,8 +429,8 @@
     }
     
     if(type === 'memberTeam') {
-      selectOption('memberFilter', '', '전체'); // UI 텍스트 업데이트 및 filters.member 초기화
-      renderMemberDropdowns(); // 정렬 다시 적용
+      selectOption('memberFilter', '', '전체'); 
+      renderMemberDropdowns(); 
     }
     if(type === 'projectTeam') {
       updateProjectChips();
@@ -644,7 +634,6 @@
     const t = rawData.tasks.find(x => x.id === id);
     if(!t) return;
 
-    // RBAC: 팀원 타인 업무 수정 방지
     if(isRegularAxMember && t.member_name !== currentUser.name) {
       alert("🚫 [접근 제한] 타인 업무 수정 불가\n\n팀원은 본인이 작성한 업무만 수정/삭제가 가능합니다.");
       return;
@@ -659,7 +648,6 @@
     document.getElementById('edProgress').value = t.progress || 0;
     document.getElementById('edPriority').value = t.priority || '중';
 
-    // 수정 창에서 내 이름 잠금 처리
     const wrapperEdMember = document.getElementById('wrapper-edMember');
     if(isRegularAxMember) {
       wrapperEdMember.classList.add('disabled-dropdown');
