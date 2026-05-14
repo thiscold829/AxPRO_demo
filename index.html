@@ -3,214 +3,537 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AxPRO | Login</title>
+<title>AxPRO | AX team Progress Report Overview</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <script src="config.js"></script>
 <style>
-  body {
-    font-family: 'Pretendard', -apple-system, sans-serif;
-    background-color: #f8fafc;
-    background-image: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 400px);
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    -webkit-font-smoothing: antialiased;
-  }
-  .ms { font-family: 'Material Symbols Outlined'; vertical-align: middle; }
-
-  .premium-card {
-    background: #ffffff;
-    border-radius: 32px;
-    box-shadow: 0 30px 60px -15px rgba(0, 102, 204, 0.1), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
-    border: 1px solid rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-  }
-
-  /* 카드 상단 블루 accent 라인 */
-  .card-accent {
-    height: 4px;
-    background: linear-gradient(90deg, #0066cc 0%, #38bdf8 100%);
-    width: 100%;
-  }
-
-  .minimal-input {
-    background: #f4f4f5;
-    border: 1.5px solid transparent;
-    border-radius: 14px;
-    padding: 16px 16px 16px 48px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #1e293b;
-    outline: none;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 100%;
-  }
-  .minimal-input::placeholder { color: #94a3b8; font-weight: 500; }
-  .minimal-input:focus {
-    background: #ffffff;
-    border-color: #0066cc;
-    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
-  }
-
-  /* 아이콘 포커스 색상 전환 (JS로 처리) */
-  .input-icon { transition: color 0.2s; }
-  .input-icon.focused { color: #0066cc; }
-
-  /* 버튼 그라디언트 */
-  .btn-login {
-    background: linear-gradient(135deg, #0066cc 0%, #0284c7 100%);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 14px rgba(0, 102, 204, 0.3);
-  }
-  .btn-login:hover {
-    background: linear-gradient(135deg, #005bb5 0%, #0272ae 100%);
-    box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
-    transform: translateY(-1px);
-  }
-  .btn-login:active { transform: scale(0.98); }
-
-  /* 에러 shake 애니메이션 */
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    20% { transform: translateX(-6px); }
-    40% { transform: translateX(6px); }
-    60% { transform: translateX(-4px); }
-    80% { transform: translateX(4px); }
-  }
-  .shake { animation: shake 0.4s ease; }
-
-  /* 로딩 스피너 */
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .spin { display: inline-block; animation: spin 0.8s linear infinite; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f8fafc; background-image: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 400px); background-repeat: no-repeat; color: #1e293b; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  .ms { font-family: 'Material Symbols Outlined'; vertical-align: middle; line-height: 1; }
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  .sticky-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 20px -10px rgba(0,102,204,0.1); }
+  .chip { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; white-space: nowrap; user-select: none; }
+  .chip-filter { background: #f1f5f9; color: #64748b; }
+  .chip-filter.active { background: #0066cc; color: #fff; box-shadow: 0 2px 8px rgba(0,102,204,0.2); }
+  .chip-multi { border: 1px solid #e2e8f0; background: #fff; color: #64748b; display: inline-flex; align-items: center; gap: 4px; }
+  .chip-multi.selected { background: #f0f9ff; color: #0066cc; border-color: #7dd3fc; }
+  #inputDockWrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1); }
+  #inputDockWrapper.expanded { max-height: 500px; overflow: visible; }
+  .compact-input { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; outline: none; transition: 0.2s; }
+  .compact-input:focus { background: #fff; border-color: #0066cc; box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
+  select.compact-input { cursor: pointer; }
+  select.compact-input:disabled { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; }
+  .task-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; transition: all 0.2s ease; }
+  .task-card.editable:hover { border-color: #7dd3fc; box-shadow: 0 4px 12px rgba(0,102,204,0.08); transform: translateY(-2px); cursor: pointer; }
+  .task-card.readonly { opacity: 0.95; cursor: default; }
+  .overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.4); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: center; justify-content: center; padding: 16px; }
+  .overlay.active { display: flex; }
+  #searchModal { z-index: 200; }
+  @keyframes pulse-sync { 50% { opacity: 0.4; } }
+  .syncing { animation: pulse-sync 1s infinite; }
 </style>
 </head>
 <body>
 
-<div class="premium-card w-full max-w-[420px] m-4 flex flex-col items-center">
-  <div class="card-accent"></div>
-
-  <div class="p-10 w-full flex flex-col items-center">
-    <!-- 로고 영역 -->
-    <div class="text-center mb-10 w-full">
-      <div class="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-50 mb-4">
-        <span class="ms text-[28px] text-[#0066cc]">settings_accessibility</span>
+<header class="sticky-header flex flex-col">
+  <div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 h-14 flex justify-between items-center border-b border-slate-100">
+    <div class="flex items-baseline gap-3 shrink-0">
+      <h1 class="text-xl font-[900] tracking-tighter text-[#0066cc]">AxPRO</h1>
+      <span class="hidden md:inline text-[11px] font-bold text-slate-400">AX team Progress Report Overview</span>
+    </div>
+    <div class="flex items-center gap-4 shrink-0">
+      <div class="flex items-center gap-2 mr-2">
+        <span class="ms text-slate-400 text-[18px]">account_circle</span>
+        <span id="loginUserInfo" class="text-[12px] font-bold text-slate-600"></span>
       </div>
-      <h1 class="text-[40px] font-[900] tracking-tighter text-[#0066cc] leading-none mb-3">AxPRO</h1>
-      <p class="text-[13px] font-[700] text-slate-500 tracking-tight">AX team Progress Report Overview</p>
-      <p class="text-[12px] font-[600] text-slate-400 mt-1">AX팀 진행 보고 총괄</p>
+      <button onclick="handleLogout()" class="text-slate-400 hover:text-rose-500 transition mr-2" title="로그아웃"><span class="ms text-[18px]">logout</span></button>
+      <div class="flex items-center gap-1.5" id="statusIndicator">
+        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider hidden sm:inline" id="statusText">Connected</span>
+      </div>
+      <button onclick="commitToCloud()" class="bg-slate-800 text-white text-[12px] font-bold px-4 py-2 rounded-md hover:bg-slate-700 transition flex items-center gap-1 shadow-sm">
+        <span class="ms text-[16px]">cloud_sync</span> DB 동기화
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-3 flex flex-col gap-3">
+    <div class="flex flex-wrap items-center gap-y-3 gap-x-5 border-b border-slate-100/50 pb-3">
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">팀원 필터</span>
+        <div class="flex gap-1.5" id="memberTeamFilters">
+          <button class="chip chip-filter" onclick="setFilter('memberTeam','전체',this)">전체</button>
+          <button class="chip chip-filter" onclick="setFilter('memberTeam','식품AX',this)">식품AX</button>
+          <button class="chip chip-filter" onclick="setFilter('memberTeam','환경AX',this)">환경AX</button>
+        </div>
+      </div>
+      <div class="w-[1px] h-4 bg-slate-200 shrink-0 hidden sm:block"></div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">담당자</span>
+        <div class="flex items-center gap-1">
+          <select id="memberFilter" class="compact-input py-1.5 text-[12px]" onchange="onMemberFilterChange(this.value)">
+            <option value="">전체</option>
+          </select>
+          <button onclick="openSearchModal('memberFilter')" class="text-slate-400 hover:text-blue-500 transition p-1" title="검색"><span class="ms text-[20px]">search</span></button>
+        </div>
+      </div>
+      <div class="w-[1px] h-4 bg-slate-200 shrink-0 hidden sm:block"></div>
+      <div class="flex items-center gap-2.5 shrink-0">
+        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">Period</span>
+        <div class="flex gap-1.5" id="periodFilters">
+          <button class="chip chip-filter" onclick="setFilter('period','전체',this)">전체</button>
+          <button class="chip chip-filter" onclick="setFilter('period','일간',this)">일간</button>
+          <button class="chip chip-filter" onclick="setFilter('period','주간',this)">주간</button>
+        </div>
+      </div>
     </div>
 
-    <!-- 입력 영역 -->
-    <div class="w-full flex flex-col gap-4 mb-8">
-      <div class="relative">
-        <span id="icon1" class="ms input-icon absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[22px]">person</span>
-        <input type="text" id="loginName" class="minimal-input" placeholder="이름 (예: 이찬)"
-          onfocus="document.getElementById('icon1').classList.add('focused')"
-          onblur="document.getElementById('icon1').classList.remove('focused')"
-          onkeypress="if(event.keyCode==13) document.getElementById('loginPw').focus()">
+    <div class="flex flex-col gap-2 pb-1">
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
+          <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 필터</span>
+          <div class="flex gap-1.5" id="projectTeamFilters">
+            <button class="chip chip-filter" onclick="setFilter('projectTeam','전체',this)">전체</button>
+            <button class="chip chip-filter" onclick="setFilter('projectTeam','식품AX',this)">식품AX</button>
+            <button class="chip chip-filter" onclick="setFilter('projectTeam','환경AX',this)">환경AX</button>
+          </div>
+        </div>
+        <button id="btnToggleProjects" class="text-[10px] bg-slate-200 hover:bg-slate-300 text-slate-600 px-2 py-1 rounded font-bold transition shrink-0" onclick="toggleAllProjects()">전체 해제</button>
       </div>
-      <div class="relative">
-        <span id="icon2" class="ms input-icon absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">lock</span>
-        <input type="password" id="loginPw" class="minimal-input" placeholder="휴대폰 번호 뒤 4자리" maxlength="4"
-          onfocus="document.getElementById('icon2').classList.add('focused')"
-          onblur="document.getElementById('icon2').classList.remove('focused')"
-          onkeypress="if(event.keyCode==13) handleLogin()">
+      <div class="flex items-center gap-2 overflow-x-auto pb-1" style="-webkit-overflow-scrolling:touch;" id="projectFilters"></div>
+    </div>
+  </div>
+</header>
+
+<div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 pt-5">
+  <button onclick="toggleInputDock()" class="flex items-center gap-1.5 text-[#0066cc] bg-blue-50 hover:bg-blue-100 px-5 py-2.5 rounded-lg text-[13px] font-bold transition w-full sm:w-auto shadow-sm">
+    <span class="ms text-[18px] transition-transform duration-300" id="dockIcon">add_circle</span> 새 업무 등록
+  </button>
+  <div id="inputDockWrapper">
+    <div class="bg-white border border-blue-100 rounded-xl p-5 mt-3 shadow-md flex flex-col gap-4">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <div class="flex items-center gap-1 sm:w-[170px] shrink-0">
+          <select id="inProject" class="compact-input flex-1 min-w-0"><option value="">과제명 선택</option></select>
+          <button onclick="openSearchModal('inProject')" class="text-slate-400 hover:text-blue-500 transition p-1 shrink-0" title="검색"><span class="ms text-[20px]">search</span></button>
+        </div>
+        <div class="flex items-center gap-1 sm:w-[130px] shrink-0">
+          <select id="inMember" class="compact-input flex-1 min-w-0"><option value="">담당자 선택</option></select>
+          <button id="btnSearchInMember" onclick="openSearchModal('inMember')" class="text-slate-400 hover:text-blue-500 transition p-1 shrink-0" title="검색"><span class="ms text-[20px]">search</span></button>
+        </div>
+        <input type="text" id="inTask" class="compact-input flex-1 min-w-0" placeholder="수행할 업무 내용을 입력하세요... (Enter 등록)" onkeypress="if(event.keyCode==13) addTask()">
+      </div>
+      <div class="flex flex-wrap items-center gap-3 bg-slate-50/50 p-3 rounded-lg border border-slate-100">
+        <select id="inPeriod" class="compact-input w-[100px] cursor-pointer text-center py-2"><option value="일간">🔥 일간</option><option value="주간">📅 주간</option></select>
+        <select id="inStatus" class="compact-input w-[100px] cursor-pointer text-center py-2"><option value="대기" selected>대기</option><option value="진행중">진행중</option><option value="완료">완료</option><option value="보류">보류</option><option value="문제발생">문제발생</option></select>
+        <div class="flex items-center gap-1 bg-white border border-slate-200 rounded-lg px-3 h-[40px]">
+          <input type="number" id="inProgress" class="bg-transparent w-[40px] text-center text-[14px] font-bold outline-none" value="0" min="0" max="100">
+          <span class="text-[13px] font-bold text-slate-400">%</span>
+        </div>
+        <select id="inPriority" class="compact-input w-[80px] cursor-pointer text-center py-2"><option value="상">상</option><option value="중" selected>중</option><option value="하">하</option></select>
+        <div class="flex-1 min-w-[20px]"></div>
+        <button onclick="addTask()" class="bg-[#0066cc] text-white px-8 py-2.5 rounded-lg text-[14px] font-bold hover:bg-blue-700 transition shrink-0 shadow-md">등록하기</button>
       </div>
     </div>
-
-    <!-- 로그인 버튼 -->
-    <button id="btnLogin" onclick="handleLogin()" class="btn-login w-full text-white font-[700] text-[15px] py-4 rounded-2xl flex justify-center items-center gap-2">
-      <span>로그인 시작</span>
-      <span class="ms text-[18px]">arrow_forward</span>
-    </button>
-
-    <p id="errorMsg" class="mt-5 text-rose-500 text-[13px] font-bold text-center hidden"></p>
   </div>
 </div>
 
-<!-- 푸터 -->
-<footer class="mt-6 flex flex-col items-center gap-1 text-[11px] font-bold text-slate-300">
+<main class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-8 flex flex-col gap-8" id="boardContainer">
+  <div class="text-center text-slate-400 font-bold mt-20 opacity-50"><span class="ms text-[40px] block mb-2 animate-spin">sync</span>데이터를 불러오는 중...</div>
+</main>
+
+<!-- 업무 수정 모달 -->
+<div class="overlay" id="editModal">
+  <div class="bg-white rounded-2xl w-full max-w-[540px] p-8 relative shadow-2xl">
+    <button onclick="closeEditModal()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-500 transition"><span class="ms text-[24px]">close</span></button>
+    <h3 class="text-[14px] font-black tracking-wider text-slate-800 uppercase mb-6">업무 상세 수정</h3>
+    <input type="hidden" id="edId">
+    <div class="flex gap-3 mb-5">
+      <div class="flex items-center gap-1 flex-1">
+        <select id="edProject" class="compact-input flex-1 min-w-0"><option value="">과제명 선택</option></select>
+        <button onclick="openSearchModal('edProject')" class="text-slate-400 hover:text-blue-500 transition p-1 shrink-0" title="검색"><span class="ms text-[20px]">search</span></button>
+      </div>
+      <div class="flex items-center gap-1 w-[140px] shrink-0">
+        <select id="edMember" class="compact-input flex-1 min-w-0"><option value="">담당자 선택</option></select>
+        <button id="btnSearchEdMember" onclick="openSearchModal('edMember')" class="text-slate-400 hover:text-blue-500 transition p-1 shrink-0" title="검색"><span class="ms text-[20px]">search</span></button>
+      </div>
+    </div>
+    <textarea id="edTask" class="compact-input w-full min-h-[100px] resize-none mb-5 text-[14px] leading-relaxed" placeholder="수행할 내용"></textarea>
+    <div class="flex gap-4 mb-8">
+      <select id="edPeriod" class="compact-input w-[100px] cursor-pointer text-center"><option value="일간">🔥 일간</option><option value="주간">📅 주간</option></select>
+      <select id="edStatus" class="compact-input flex-1"><option>대기</option><option>진행중</option><option>완료</option><option>보류</option><option>문제발생</option></select>
+      <div class="flex items-center gap-1 bg-[#f8fafc] border border-slate-200 rounded-lg px-3">
+        <input type="number" id="edProgress" class="bg-transparent w-[50px] text-center text-[14px] font-bold outline-none" placeholder="0">
+        <span class="text-[13px] font-bold text-slate-400">%</span>
+      </div>
+      <select id="edPriority" class="compact-input flex-1"><option>상</option><option>중</option><option>하</option></select>
+    </div>
+    <div class="flex justify-between items-center pt-5 border-t border-slate-100">
+      <button onclick="deleteTask()" class="text-rose-500 text-[13px] font-bold px-3 py-2 hover:bg-rose-50 rounded transition">삭제</button>
+      <button onclick="saveEdit()" class="bg-[#0066cc] text-white text-[13px] font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition shadow-md">변경사항 저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 검색 모달 -->
+<div class="overlay" id="searchModal">
+  <div class="bg-white rounded-2xl w-full max-w-[400px] p-6 relative shadow-2xl">
+    <button onclick="closeSearchModal()" class="absolute top-4 right-4 text-slate-400 hover:text-rose-500 transition"><span class="ms text-[24px]">close</span></button>
+    <h3 id="searchModalTitle" class="text-[15px] font-black text-slate-800 mb-4">선택</h3>
+    <input type="text" id="searchModalInput" class="compact-input w-full mb-3" placeholder="검색..." oninput="filterSearchModal(this.value)">
+    <div id="searchModalList" class="flex flex-col gap-1 max-h-[60vh] overflow-y-auto"></div>
+  </div>
+</div>
+
+<form id="hidden_form" target="hidden_iframe" method="POST" style="display:none;"><input type="hidden" name="payload" id="payload_input"></form>
+<iframe name="hidden_iframe" style="display:none;" onload="if(window.isSaving) onSaveSuccess();"></iframe>
+
+<script>
+  const S_ID = (typeof CONFIG !== 'undefined' && CONFIG.SHEET_ID) ? CONFIG.SHEET_ID : '';
+  const A_URL = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : '';
+
+  const userStr = sessionStorage.getItem('axUser');
+  if(!userStr) { alert("로그인이 필요합니다."); location.replace('index.html'); }
+  const currentUser = JSON.parse(userStr);
+  document.getElementById('loginUserInfo').textContent = `${currentUser.dept||''} ${currentUser.name} ${currentUser.rank||''}`;
+
+  const isAxTeam = currentUser.dept && (currentUser.dept.includes('식품') || currentUser.dept.includes('환경'));
+  const isManager = currentUser.rank && (currentUser.rank.includes('팀장') || currentUser.rank.includes('실장') || currentUser.rank.includes('사장') || currentUser.rank.includes('본부장'));
+  const isRegularAxMember = isAxTeam && !isManager;
+
+  let userTeamKeyword = '';
+  if(currentUser.dept && currentUser.dept.includes('식품')) userTeamKeyword = '식품';
+  else if(currentUser.dept && currentUser.dept.includes('환경')) userTeamKeyword = '환경';
+
+  let rawData = { members:[], projects:[], tasks:[] };
+  let filters = { memberTeam:'전체', projectTeam:'전체', period:'전체', member: isRegularAxMember ? currentUser.name : '전체', selectedProjects: new Set() };
+  let isDockOpen = false;
+  let searchModalTarget = null;
+
+  const searchTitles = { memberFilter:'담당자 선택', inProject:'과제명 선택', inMember:'담당자 선택', edProject:'과제명 선택', edMember:'담당자 선택' };
+
+  window.onload = async () => {
+    if(!S_ID) return alert("config.js에 SHEET_ID가 없습니다.");
+    await Promise.all([
+      fetchData('members').then(d => rawData.members = d),
+      fetchData('projects').then(d => rawData.projects = d),
+      fetchData('tasks').then(d => rawData.tasks = d)
+    ]);
+    applySmartSorting();
+    renderProjectDropdowns();
+    renderMemberDropdowns();
+    initFilterUI();
+    applyRoleBasedUI();
+    updateProjectChips();
+    renderBoard();
+  };
+
+  function openSearchModal(targetId) {
+    searchModalTarget = targetId;
+    document.getElementById('searchModalTitle').textContent = searchTitles[targetId] || '선택';
+    document.getElementById('searchModalInput').value = '';
+    renderSearchList('');
+    document.getElementById('searchModal').classList.add('active');
+    setTimeout(() => document.getElementById('searchModalInput').focus(), 100);
+  }
+
+  function renderSearchList(query) {
+    const sel = document.getElementById(searchModalTarget);
+    const opts = Array.from(sel.options).filter(o => o.value !== '');
+    const q = query.toLowerCase();
+    const filtered = q ? opts.filter(o => o.text.toLowerCase().includes(q)) : opts;
+    const currentVal = sel.value;
+    document.getElementById('searchModalList').innerHTML = filtered.length
+      ? filtered.map(o => `<div class="px-4 py-2.5 rounded-lg cursor-pointer text-[14px] font-medium transition ${o.value===currentVal?'bg-blue-50 text-blue-700 font-bold':'text-slate-700 hover:bg-slate-50'}" onclick="selectFromModal('${o.value}')">${o.text}</div>`).join('')
+      : '<div class="text-center text-slate-400 text-[13px] py-4">검색 결과 없음</div>';
+  }
+
+  function filterSearchModal(query) { renderSearchList(query); }
+
+  function selectFromModal(value) {
+    document.getElementById(searchModalTarget).value = value;
+    if(searchModalTarget === 'memberFilter') {
+      filters.member = value === '' ? '전체' : value;
+      updateProjectChips();
+      renderBoard();
+    }
+    closeSearchModal();
+  }
+
+  function closeSearchModal() { document.getElementById('searchModal').classList.remove('active'); searchModalTarget = null; }
+
+  function onMemberFilterChange(value) {
+    filters.member = value === '' ? '전체' : value;
+    updateProjectChips();
+    renderBoard();
+  }
+
+  function applySmartSorting() {
+    if(!userTeamKeyword) return;
+    const sort = (arr, key) => arr.sort((a,b) => { const aM=a[key]&&a[key].includes(userTeamKeyword), bM=b[key]&&b[key].includes(userTeamKeyword); return aM===bM?0:aM?-1:1; });
+    sort(rawData.members, 'dept');
+    sort(rawData.projects, 'team');
+  }
+
+  function renderProjectDropdowns() {
+    const opts = rawData.projects.map(p => `<option value="${p.short_name}">${p.short_name}</option>`).join('');
+    ['inProject','edProject'].forEach(id => { document.getElementById(id).innerHTML = '<option value="">과제명 선택</option>' + opts; });
+  }
+
+  function renderMemberDropdowns() {
+    let members = rawData.members.filter(m => m.dept && (m.dept.includes('식품') || m.dept.includes('환경')));
+    const priority = filters.memberTeam !== '전체' ? filters.memberTeam.replace('AX','').trim() : userTeamKeyword;
+    if(priority) members.sort((a,b) => { const aM=a.dept&&a.dept.includes(priority), bM=b.dept&&b.dept.includes(priority); return aM===bM?0:aM?-1:1; });
+    const opts = members.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+    document.getElementById('memberFilter').innerHTML = '<option value="">전체</option>' + opts;
+    document.getElementById('memberFilter').value = filters.member === '전체' ? '' : filters.member;
+    ['inMember','edMember'].forEach(id => { document.getElementById(id).innerHTML = '<option value="">담당자 선택</option>' + opts; });
+  }
+
+  function initFilterUI() {
+    document.querySelectorAll('#memberTeamFilters .chip').forEach(c => c.classList.toggle('active', c.textContent===filters.memberTeam));
+    document.querySelectorAll('#projectTeamFilters .chip').forEach(c => c.classList.toggle('active', c.textContent===filters.projectTeam));
+    document.querySelectorAll('#periodFilters .chip').forEach(c => c.classList.toggle('active', c.textContent===filters.period));
+    document.getElementById('memberFilter').value = filters.member === '전체' ? '' : filters.member;
+  }
+
+  function applyRoleBasedUI() {
+    if(isRegularAxMember) {
+      const sel = document.getElementById('inMember');
+      sel.value = currentUser.name;
+      sel.disabled = true;
+      document.getElementById('btnSearchInMember').style.display = 'none';
+    }
+  }
+
+  function handleLogout() { sessionStorage.removeItem('axUser'); location.replace('index.html'); }
+
+  async function fetchData(sheetName) {
+    try {
+      const res = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}`);
+      return parseCSV(await res.text());
+    } catch(e) { console.error(e); return []; }
+  }
+  function parseCSV(t) {
+    const lines=t.trim().split('\n'); if(lines.length<2) return [];
+    const hdrs=lines[0].split(',').map(h=>h.trim().replace(/^"|"$/g,''));
+    return lines.slice(1).map(l=>{
+      const v=[]; let c='',q=false;
+      for(let i=0;i<l.length;i++){const ch=l[i];if(ch==='"')q=!q;else if(ch===','&&!q){v.push(c.trim());c='';}else c+=ch;}
+      v.push(c.trim()); const o={}; hdrs.forEach((h,i)=>o[h]=(v[i]||'').replace(/^"|"$/g,'')); return o;
+    }).filter(row=>Object.values(row).some(val=>val!==''));
+  }
+
+  function setFilter(type, value, btn) {
+    filters[type] = value;
+    if(btn) { btn.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); btn.classList.add('active'); }
+    if(type==='memberTeam') { filters.member='전체'; renderMemberDropdowns(); }
+    updateProjectChips();
+    renderBoard();
+  }
+
+  function getActiveTasksForChips() {
+    return rawData.tasks.filter(t => {
+      if(filters.period!=='전체'&&t.period!==filters.period) return false;
+      if(filters.member!=='전체'&&t.member_name!==filters.member) return false;
+      if(filters.memberTeam!=='전체') { const m=rawData.members.find(m=>m.name===t.member_name); if(!m||!m.dept||!m.dept.includes(filters.memberTeam.replace('AX',''))) return false; }
+      return true;
+    });
+  }
+
+  function toggleAllProjects() {
+    const projs = filters.projectTeam==='전체' ? rawData.projects : rawData.projects.filter(p=>p.team===filters.projectTeam);
+    const active = getActiveTasksForChips();
+    const sel = projs.filter(p=>active.some(t=>t.project_short===p.short_name));
+    if(filters.selectedProjects.size===sel.length&&sel.length>0) filters.selectedProjects.clear();
+    else sel.forEach(p=>filters.selectedProjects.add(p.short_name));
+    renderProjectChipsUI(); renderBoard();
+  }
+
+  function toggleProjectChip(projName, el) {
+    if(el.classList.contains('opacity-40')) return;
+    if(filters.selectedProjects.has(projName)) filters.selectedProjects.delete(projName);
+    else filters.selectedProjects.add(projName);
+    renderProjectChipsUI(); renderBoard();
+  }
+
+  function renderProjectChipsUI() {
+    const projs = filters.projectTeam==='전체' ? rawData.projects : rawData.projects.filter(p=>p.team===filters.projectTeam);
+    const active = getActiveTasksForChips();
+    const sel = projs.filter(p=>active.some(t=>t.project_short===p.short_name));
+    const btn = document.getElementById('btnToggleProjects');
+    if(sel.length===0){btn.textContent='선택 불가';btn.classList.add('opacity-40','cursor-not-allowed');btn.classList.remove('hover:bg-slate-300');}
+    else if(filters.selectedProjects.size===sel.length){btn.textContent='전체 해제';btn.classList.remove('opacity-40','cursor-not-allowed');btn.classList.add('hover:bg-slate-300');}
+    else{btn.textContent='전체 선택';btn.classList.remove('opacity-40','cursor-not-allowed');btn.classList.add('hover:bg-slate-300');}
+    const sorted = [
+      ...projs.filter(p => active.some(t => t.project_short === p.short_name)),
+      ...projs.filter(p => !active.some(t => t.project_short === p.short_name))
+    ];
+    document.getElementById('projectFilters').innerHTML = sorted.map(p => {
+      const cnt = active.filter(t=>t.project_short===p.short_name).length;
+      if(cnt===0) return `<button class="chip chip-multi opacity-40 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400">${p.short_name}</button>`;
+      const s = filters.selectedProjects.has(p.short_name);
+      return `<button class="chip chip-multi ${s?'selected':''}" onclick="toggleProjectChip('${p.short_name}',this)">${s?'<span class="ms text-[14px]">check</span>':''} ${p.short_name}</button>`;
+    }).join('');
+  }
+
+  function updateProjectChips() {
+    filters.selectedProjects.clear();
+    const projs = filters.projectTeam==='전체' ? rawData.projects : rawData.projects.filter(p=>p.team===filters.projectTeam);
+    const active = getActiveTasksForChips();
+    projs.forEach(p=>{ if(active.some(t=>t.project_short===p.short_name)) filters.selectedProjects.add(p.short_name); });
+    renderProjectChipsUI();
+  }
+
+  function renderBoard() {
+    const container = document.getElementById('boardContainer');
+    const filtered = rawData.tasks.filter(t => {
+      if(filters.period!=='전체'&&t.period!==filters.period) return false;
+      if(filters.member!=='전체'&&t.member_name!==filters.member) return false;
+      if(filters.memberTeam!=='전체'){const m=rawData.members.find(m=>m.name===t.member_name);if(!m||!m.dept||!m.dept.includes(filters.memberTeam.replace('AX','')))return false;}
+      if(filters.selectedProjects.size>0&&!filters.selectedProjects.has(t.project_short)) return false;
+      return true;
+    });
+    const grouped = {};
+    filters.selectedProjects.forEach(p=>grouped[p]=[]);
+    filtered.forEach(t=>{if(grouped[t.project_short]!==undefined)grouped[t.project_short].push(t);});
+    const activeProjs = Object.keys(grouped).filter(p=>grouped[p].length>0);
+    if(activeProjs.length===0){container.innerHTML=`<div class="text-center text-slate-400 font-bold mt-24 opacity-50 text-[14px]">해당 조건에 부합하는 과제 및 업무가 없습니다.</div>`;return;}
+    container.innerHTML = activeProjs.map(projName => {
+      const pi = rawData.projects.find(p=>p.short_name===projName)||{};
+      const tList = grouped[projName];
+      return `<section class="bg-white rounded-[20px] shadow-sm border border-slate-200 p-5 lg:p-7">
+        <div class="flex items-center gap-3 mb-5 pb-4 border-b border-slate-100">
+          <span class="bg-blue-50 text-[#0066cc] text-[11px] font-black px-2 py-0.5 rounded">${pi.team||'미분류'}</span>
+          <h2 class="text-xl font-[800] text-slate-800 leading-none">${projName}</h2>
+          <span class="text-[13px] text-slate-400 font-medium hidden sm:inline ml-1">- ${pi.full_name||''}</span>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-10">
+          <div class="flex flex-col gap-3">
+            <div class="text-[12px] font-black text-rose-500 uppercase flex items-center gap-1.5"><span class="ms text-[16px]">local_fire_department</span> Daily Focus</div>
+            ${tList.filter(t=>t.period==='일간').map(t=>generateTaskCard(t)).join('')||'<div class="text-[13px] text-slate-400 py-3 font-medium">등록된 일간 업무가 없습니다.</div>'}
+          </div>
+          <div class="flex flex-col gap-3 lg:border-l lg:border-slate-100 lg:pl-10">
+            <div class="text-[12px] font-black text-[#0066cc] uppercase flex items-center gap-1.5"><span class="ms text-[16px]">calendar_today</span> Weekly Flow</div>
+            ${tList.filter(t=>t.period==='주간').map(t=>generateTaskCard(t)).join('')||'<div class="text-[13px] text-slate-400 py-3 font-medium">등록된 주간 업무가 없습니다.</div>'}
+          </div>
+        </div>
+      </section>`;
+    }).join('');
+  }
+
+  function generateTaskCard(t) {
+    const pColor = t.priority==='상'?'text-rose-600 bg-rose-50':t.priority==='중'?'text-slate-500 bg-slate-100':'text-slate-400 bg-slate-50';
+    let sColor='text-slate-600 bg-slate-50';
+    if(t.status==='대기')sColor='text-emerald-600 bg-emerald-50';
+    else if(t.status==='진행중')sColor='text-blue-600 bg-blue-50';
+    else if(t.status==='문제발생')sColor='text-rose-600 bg-rose-50';
+    else if(t.status==='완료')sColor='text-slate-400 bg-slate-100 line-through';
+    const canEdit = isManager || t.member_name===currentUser.name;
+    const action = canEdit ? `openEditModal('${t.id}')` : `alert('열람 전용입니다. 타인의 업무는 수정/삭제할 수 없습니다.')`;
+    return `<div class="task-card ${canEdit?'editable':'readonly'}" onclick="${action}">
+      <div class="flex justify-between items-start gap-3 mb-2.5">
+        <p class="text-[14px] font-semibold text-slate-700 leading-relaxed break-keep whitespace-pre-wrap">${t.content}</p>
+        <span class="${pColor} text-[11px] font-bold px-2 py-0.5 rounded shrink-0">${t.priority}</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <span class="bg-slate-100 text-slate-600 text-[11px] font-bold px-2 py-1 rounded">${t.member_name}</span>
+        ${t.progress?`<div class="flex-1 max-w-[80px] h-[6px] bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-blue-500" style="width:${t.progress}%"></div></div><span class="text-[11px] font-bold text-slate-400">${t.progress}%</span>`:''}
+        <span class="ml-auto text-[11px] font-black ${sColor} px-2 py-1 rounded">${t.status}</span>
+      </div>
+    </div>`;
+  }
+
+  function toggleInputDock() {
+    isDockOpen=!isDockOpen;
+    document.getElementById('inputDockWrapper').classList.toggle('expanded');
+    document.getElementById('dockIcon').style.transform=isDockOpen?"rotate(45deg)":"rotate(0deg)";
+  }
+
+  function addTask() {
+    const proj = document.getElementById('inProject').value;
+    const mem = isRegularAxMember ? currentUser.name : document.getElementById('inMember').value;
+    const task = document.getElementById('inTask').value.trim();
+    if(!proj||!task||!mem) return alert("과제명, 담당자, 업무 내용을 모두 선택/입력하세요.");
+    rawData.tasks.push({ id:'T-'+Date.now(), project_short:proj, member_name:mem, content:task,
+      period:document.getElementById('inPeriod').value, status:document.getElementById('inStatus').value,
+      progress:document.getElementById('inProgress').value||0, priority:document.getElementById('inPriority').value,
+      last_updated:new Date().toISOString() });
+    document.getElementById('inTask').value='';
+    document.getElementById('inProgress').value=0;
+    document.getElementById('inStatus').value='대기';
+    document.getElementById('inPriority').value='중';
+    document.getElementById('inProject').value='';
+    if(!isRegularAxMember) document.getElementById('inMember').value='';
+    updateProjectChips(); renderBoard(); commitToCloud();
+  }
+
+  function openEditModal(id) {
+    const t = rawData.tasks.find(x=>x.id===id);
+    if(!t) return;
+    if(isRegularAxMember&&t.member_name!==currentUser.name){ alert("🚫 [접근 제한] 타인 업무 수정 불가\n\n팀원은 본인이 작성한 업무만 수정/삭제가 가능합니다."); return; }
+    document.getElementById('edId').value=t.id;
+    document.getElementById('edProject').value=t.project_short;
+    document.getElementById('edMember').value=t.member_name;
+    document.getElementById('edTask').value=t.content;
+    document.getElementById('edPeriod').value=t.period||'일간';
+    document.getElementById('edStatus').value=t.status||'대기';
+    document.getElementById('edProgress').value=t.progress||0;
+    document.getElementById('edPriority').value=t.priority||'중';
+    document.getElementById('edMember').disabled=isRegularAxMember;
+    document.getElementById('btnSearchEdMember').style.display=isRegularAxMember?'none':'';
+    document.getElementById('editModal').classList.add('active');
+  }
+
+  function closeEditModal(){ document.getElementById('editModal').classList.remove('active'); }
+
+  function saveEdit() {
+    const id=document.getElementById('edId').value;
+    const idx=rawData.tasks.findIndex(x=>x.id===id);
+    if(idx>-1){
+      rawData.tasks[idx]={ id, project_short:document.getElementById('edProject').value,
+        member_name:isRegularAxMember?rawData.tasks[idx].member_name:document.getElementById('edMember').value,
+        content:document.getElementById('edTask').value, period:document.getElementById('edPeriod').value,
+        status:document.getElementById('edStatus').value, progress:document.getElementById('edProgress').value,
+        priority:document.getElementById('edPriority').value, last_updated:new Date().toISOString() };
+      closeEditModal(); updateProjectChips(); renderBoard(); commitToCloud();
+    }
+  }
+
+  function deleteTask() {
+    if(!confirm("이 업무를 삭제하시겠습니까?")) return;
+    const id=document.getElementById('edId').value;
+    rawData.tasks=rawData.tasks.filter(x=>x.id!==id);
+    closeEditModal(); updateProjectChips(); renderBoard(); commitToCloud();
+  }
+
+  function commitToCloud() {
+    if(!A_URL) return alert('API 주소가 설정되지 않았습니다.');
+    if(window.isSaving) return;
+    window.isSaving=true;
+    document.getElementById('statusIndicator').querySelector('div').classList.replace('bg-emerald-500','bg-blue-500');
+    document.getElementById('statusIndicator').querySelector('div').classList.add('syncing');
+    document.getElementById('statusText').textContent="Syncing...";
+    const payload={action:'write',sheetName:'tasks',data:rawData.tasks};
+    document.getElementById('payload_input').value=JSON.stringify(payload);
+    document.getElementById('hidden_form').action=A_URL;
+    document.getElementById('hidden_form').submit();
+  }
+
+  function onSaveSuccess() {
+    window.isSaving=false;
+    document.getElementById('statusIndicator').querySelector('div').classList.replace('bg-blue-500','bg-emerald-500');
+    document.getElementById('statusIndicator').querySelector('div').classList.remove('syncing');
+    document.getElementById('statusText').textContent="Connected";
+  }
+
+  function manualSync(){ commitToCloud(); }
+  window.addEventListener('keydown',(e)=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();manualSync();} });
+</script>
+<footer class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-6 mt-2 border-t border-slate-100 flex flex-col items-center gap-1 text-[11px] font-bold text-slate-300">
   <span>© 2026 AxPRO · CHAN LEE</span>
   <span>Mk.1 · StackUI · Internal Preview</span>
 </footer>
-
-<script>
-  if(sessionStorage.getItem('axUser')) location.replace('axpro.html');
-
-  async function handleLogin() {
-    const inputName = document.getElementById('loginName').value.trim();
-    const inputPw = document.getElementById('loginPw').value.trim();
-    const btn = document.getElementById('btnLogin');
-    const err = document.getElementById('errorMsg');
-
-    if(!inputName || !inputPw) {
-      showError("이름과 휴대폰 번호 4자리를 정확히 입력하세요.");
-      return;
-    }
-
-    btn.innerHTML = `<span class="spin ms text-[20px]">autorenew</span> <span>인증 중...</span>`;
-    btn.disabled = true;
-    btn.classList.add('opacity-80', 'cursor-not-allowed');
-    err.classList.add('hidden');
-
-    try {
-      if(typeof CONFIG === 'undefined' || !CONFIG.SHEET_ID) throw new Error("config.js 설정 오류");
-
-      const res = await fetch(`https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=members`);
-      const text = await res.text();
-      const members = parseCSV(text);
-
-      const user = members.find(m => {
-        const mName = (m.name || '').trim();
-        const mMobileOnlyNumbers = String(m.mobile || '').replace(/\D/g, '');
-        return mName === inputName && mMobileOnlyNumbers.endsWith(inputPw) && inputPw.length === 4;
-      });
-
-      if(user) {
-        sessionStorage.setItem('axUser', JSON.stringify(user));
-        location.replace('axpro.html');
-      } else {
-        showError("등록되지 않은 직원이거나 휴대폰 번호가 일치하지 않습니다.");
-      }
-    } catch(e) {
-      showError("DB 연결 실패: 권한 설정이나 인터넷 연결을 확인하세요.");
-      console.error(e);
-    }
-  }
-
-  function showError(msg) {
-    const err = document.getElementById('errorMsg');
-    const btn = document.getElementById('btnLogin');
-    err.textContent = msg;
-    err.classList.remove('hidden');
-    err.classList.remove('shake');
-    void err.offsetWidth; // reflow로 애니메이션 재실행
-    err.classList.add('shake');
-    btn.innerHTML = `<span>로그인 시작</span> <span class="ms text-[18px]">arrow_forward</span>`;
-    btn.disabled = false;
-    btn.classList.remove('opacity-80', 'cursor-not-allowed');
-  }
-
-  function parseCSV(t) {
-    const lines = t.trim().split(/\r?\n/); if(lines.length < 2) return [];
-    const hdrs = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
-    return lines.slice(1).map(l => {
-      const v = []; let c = '', q = false;
-      for(let i=0; i<l.length; i++) {
-        const ch = l[i];
-        if(ch === '"') q = !q;
-        else if(ch === ',' && !q) { v.push(c.trim()); c = ''; }
-        else c += ch;
-      }
-      v.push(c.trim());
-      const o = {}; hdrs.forEach((h, i) => o[h] = (v[i] || '').replace(/^"|"$/g, '').trim()); return o;
-    }).filter(row => Object.values(row).some(val => val !== ''));
-  }
-</script>
 </body>
 </html>
