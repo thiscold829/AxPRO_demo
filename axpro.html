@@ -329,7 +329,7 @@
     filters[type] = value;
     if(btn) { btn.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); btn.classList.add('active'); }
     if(type==='memberTeam') { filters.member='전체'; renderMemberDropdowns(); }
-    if(type==='projectTeam') updateProjectChips();
+    updateProjectChips();
     renderBoard();
   }
 
