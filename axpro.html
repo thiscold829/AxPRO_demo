@@ -38,8 +38,10 @@
   @keyframes pulse-sync { 50% { opacity: 0.4; } }
   .syncing { animation: pulse-sync 1s infinite; }
 
-  /* 커스텀 드롭다운용 필수 스타일 */
   .disabled-dropdown { opacity: 0.6; pointer-events: none; background-color: #f1f5f9 !important; border-color: #e2e8f0 !important; }
+
+  /* 드롭다운: fixed 포지셔닝 기반으로 동작하므로 absolute 클래스 무력화 */
+  .dropdown-menu { position: fixed !important; }
 </style>
 </head>
 <body>
@@ -68,7 +70,7 @@
 
   <div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-3 flex flex-col gap-3">
     
-    <div class="flex flex-wrap items-center gap-x-5 gap-y-3 pb-1 border-b border-slate-100/50 pb-3" id="filterArea1">
+    <div class="flex flex-wrap items-center gap-y-3 gap-x-5 border-b border-slate-100/50 pb-3" id="filterArea1">
       <div class="flex items-center gap-2.5 shrink-0">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">담당 조직</span>
         <div class="flex gap-1.5" id="memberTeamFilters">
@@ -86,7 +88,7 @@
             <span id="display-memberFilter" class="truncate w-full">전체</span>
             <span class="ms text-[14px] text-slate-400">expand_more</span>
           </div>
-          <div id="drop-memberFilter" class="dropdown-menu absolute top-full left-0 mt-1 w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[100] hidden flex-col overflow-hidden">
+          <div id="drop-memberFilter" class="dropdown-menu w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[9999] hidden flex-col overflow-hidden">
             <div class="p-1.5 border-b border-slate-100 bg-slate-50">
               <input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[12px] outline-none focus:border-blue-400" placeholder="이름 검색..." oninput="filterList('memberFilter', this.value)">
             </div>
@@ -106,7 +108,7 @@
       </div>
     </div>
 
-    <div class="flex flex-wrap items-center gap-x-3 gap-y-2 pb-1 min-h-[34px]" id="filterArea2">
+    <div class="flex flex-wrap items-center gap-y-2 gap-x-3 min-h-[34px] pb-1" id="filterArea2">
       <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
         <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 주관</span>
         <div class="flex gap-1.5" id="projectTeamFilters">
@@ -139,7 +141,7 @@
             <span id="display-inProject" class="truncate text-slate-400">과제명 선택</span>
             <span class="ms text-[16px] text-slate-400">expand_more</span>
           </div>
-          <div id="drop-inProject" class="dropdown-menu absolute top-full left-0 mt-1 w-full min-w-[200px] bg-white border border-slate-200 rounded-lg shadow-xl z-[100] hidden flex-col overflow-hidden">
+          <div id="drop-inProject" class="dropdown-menu w-[200px] bg-white border border-slate-200 rounded-lg shadow-xl z-[9999] hidden flex-col overflow-hidden">
             <div class="p-1.5 border-b border-slate-100 bg-slate-50">
               <input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[12px] outline-none focus:border-blue-400" placeholder="과제 검색..." oninput="filterList('inProject', this.value)">
             </div>
@@ -152,7 +154,7 @@
             <span id="display-inMember" class="truncate text-slate-400">담당자 선택</span>
             <span class="ms text-[16px] text-slate-400">expand_more</span>
           </div>
-          <div id="drop-inMember" class="dropdown-menu absolute top-full left-0 mt-1 w-full min-w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[100] hidden flex-col overflow-hidden">
+          <div id="drop-inMember" class="dropdown-menu w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[9999] hidden flex-col overflow-hidden">
             <div class="p-1.5 border-b border-slate-100 bg-slate-50">
               <input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[12px] outline-none focus:border-blue-400" placeholder="이름 검색..." oninput="filterList('inMember', this.value)">
             </div>
@@ -193,7 +195,7 @@
           <span id="display-edProject" class="truncate">과제명</span>
           <span class="ms text-[16px] text-slate-400">expand_more</span>
         </div>
-        <div id="drop-edProject" class="dropdown-menu absolute top-full left-0 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-xl z-[100] hidden flex-col overflow-hidden">
+        <div id="drop-edProject" class="dropdown-menu w-[240px] bg-white border border-slate-200 rounded-lg shadow-xl z-[9999] hidden flex-col overflow-hidden">
           <div class="p-1.5 border-b border-slate-100 bg-slate-50">
             <input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[12px] outline-none focus:border-blue-400" placeholder="과제 검색..." oninput="filterList('edProject', this.value)">
           </div>
@@ -206,7 +208,7 @@
           <span id="display-edMember" class="truncate">담당자</span>
           <span class="ms text-[16px] text-slate-400">expand_more</span>
         </div>
-        <div id="drop-edMember" class="dropdown-menu absolute top-full left-0 mt-1 w-full min-w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[100] hidden flex-col overflow-hidden">
+        <div id="drop-edMember" class="dropdown-menu w-[150px] bg-white border border-slate-200 rounded-lg shadow-xl z-[9999] hidden flex-col overflow-hidden">
           <div class="p-1.5 border-b border-slate-100 bg-slate-50">
             <input type="text" class="w-full bg-white border border-slate-200 rounded px-2 py-1.5 text-[12px] outline-none focus:border-blue-400" placeholder="이름 검색..." oninput="filterList('edMember', this.value)">
           </div>
@@ -285,23 +287,48 @@
     renderBoard();
   };
 
+  // ★ 핵심 수정: fixed 포지셔닝으로 드롭다운 위치 계산 (overflow/stacking context 완전 우회)
   function toggleDropdown(id) {
     const wrapper = document.getElementById(`wrapper-${id}`);
-    if (wrapper.classList.contains('disabled-dropdown')) return;
+    if (wrapper && wrapper.classList.contains('disabled-dropdown')) return;
 
     const drop = document.getElementById(`drop-${id}`);
     const isHidden = drop.classList.contains('hidden');
     
+    // 모든 드롭다운 닫기
     document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
     
     if (isHidden) {
+      const rect = wrapper.getBoundingClientRect();
+      // 드롭다운 너비: wrapper 너비와 지정 최소 너비 중 큰 값
+      const minWidths = { memberFilter: 150, inProject: 200, inMember: 150, edProject: 240, edMember: 150 };
+      const minW = minWidths[id] || 150;
+      const dropWidth = Math.max(rect.width, minW);
+
+      // 화면 오른쪽 잘림 방지
+      const leftPos = Math.min(rect.left, window.innerWidth - dropWidth - 8);
+
+      drop.style.top = (rect.bottom + 4) + 'px';
+      drop.style.left = leftPos + 'px';
+      drop.style.width = dropWidth + 'px';
+
       drop.classList.remove('hidden');
       const input = drop.querySelector('input');
-      input.value = ''; 
-      filterList(id, ''); 
-      input.focus();
+      if (input) {
+        input.value = ''; 
+        filterList(id, ''); 
+        input.focus();
+      }
     }
   }
+
+  // 스크롤/리사이즈 시 드롭다운 닫기
+  window.addEventListener('scroll', () => {
+    document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+  }, true);
+  window.addEventListener('resize', () => {
+    document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+  });
 
   function selectOption(id, value, text) {
     cv[id] = value;
