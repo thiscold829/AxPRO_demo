@@ -219,6 +219,7 @@
     <textarea id="edTask" class="compact-input w-full min-h-[100px] resize-none mb-5 text-[14px] leading-relaxed" placeholder="수행할 내용"></textarea>
     
     <div class="flex gap-4 mb-8">
+      <select id="edPeriod" class="compact-input w-[100px] cursor-pointer text-center"><option value="일간">🔥 일간</option><option value="주간">📅 주간</option></select>
       <select id="edStatus" class="compact-input flex-1"><option>대기</option><option>진행중</option><option>완료</option><option>보류</option><option>문제발생</option></select>
       <div class="flex items-center gap-1 bg-[#f8fafc] border border-slate-200 rounded-lg px-3">
         <input type="number" id="edProgress" class="bg-transparent w-[50px] text-center text-[14px] font-bold outline-none" placeholder="0">
@@ -671,6 +672,7 @@
     selectOption('edMember', t.member_name, t.member_name);
     
     document.getElementById('edTask').value = t.content;
+    document.getElementById('edPeriod').value = t.period || '일간';
     document.getElementById('edStatus').value = t.status || '대기';
     document.getElementById('edProgress').value = t.progress || 0;
     document.getElementById('edPriority').value = t.priority || '중';
@@ -696,7 +698,7 @@
       rawData.tasks[idx] = {
         id: id, project_short: cv.edProject,
         member_name: finalMemberName, content: document.getElementById('edTask').value,
-        period: rawData.tasks[idx].period, status: document.getElementById('edStatus').value,
+        period: document.getElementById('edPeriod').value, status: document.getElementById('edStatus').value,
         progress: document.getElementById('edProgress').value, priority: document.getElementById('edPriority').value,
         last_updated: new Date().toISOString()
       };
