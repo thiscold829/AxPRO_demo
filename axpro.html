@@ -196,8 +196,8 @@
   let rawData = { members: [], projects: [], tasks: [] };
   
   let filters = { 
-    memberTeam: '전체', // ✨ 수정됨: 직급/소속 상관없이 무조건 '전체'로 고정
-    projectTeam: isRegularAxMember && userTeamKeyword ? userTeamKeyword + 'AX' : '전체', 
+    memberTeam: '전체',
+    projectTeam: '전체',
     period: '전체', 
     member: isRegularAxMember ? currentUser.name : '전체', 
     selectedProjects: new Set() 
