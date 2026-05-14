@@ -62,7 +62,7 @@
   <div class="max-w-[1600px] w-full mx-auto px-4 lg:px-6 py-3 flex flex-col gap-3">
     <div class="flex flex-wrap items-center gap-y-3 gap-x-5 border-b border-slate-100/50 pb-3">
       <div class="flex items-center gap-2.5 shrink-0">
-        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">담당 조직</span>
+        <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">팀원 필터</span>
         <div class="flex gap-1.5" id="memberTeamFilters">
           <button class="chip chip-filter" onclick="setFilter('memberTeam','전체',this)">전체</button>
           <button class="chip chip-filter" onclick="setFilter('memberTeam','식품AX',this)">식품AX</button>
@@ -93,7 +93,7 @@
     <div class="flex flex-col gap-2 pb-1">
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-2.5 shrink-0 border-r border-slate-200 pr-4 mr-1">
-          <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 주관</span>
+          <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider">사업 필터</span>
           <div class="flex gap-1.5" id="projectTeamFilters">
             <button class="chip chip-filter" onclick="setFilter('projectTeam','전체',this)">전체</button>
             <button class="chip chip-filter" onclick="setFilter('projectTeam','식품AX',this)">식품AX</button>
@@ -366,7 +366,11 @@
     if(sel.length===0){btn.textContent='선택 불가';btn.classList.add('opacity-40','cursor-not-allowed');btn.classList.remove('hover:bg-slate-300');}
     else if(filters.selectedProjects.size===sel.length){btn.textContent='전체 해제';btn.classList.remove('opacity-40','cursor-not-allowed');btn.classList.add('hover:bg-slate-300');}
     else{btn.textContent='전체 선택';btn.classList.remove('opacity-40','cursor-not-allowed');btn.classList.add('hover:bg-slate-300');}
-    document.getElementById('projectFilters').innerHTML = projs.map(p => {
+    const sorted = [
+      ...projs.filter(p => active.some(t => t.project_short === p.short_name)),
+      ...projs.filter(p => !active.some(t => t.project_short === p.short_name))
+    ];
+    document.getElementById('projectFilters').innerHTML = sorted.map(p => {
       const cnt = active.filter(t=>t.project_short===p.short_name).length;
       if(cnt===0) return `<button class="chip chip-multi opacity-40 cursor-not-allowed bg-slate-50 border-slate-200 text-slate-400">${p.short_name}</button>`;
       const s = filters.selectedProjects.has(p.short_name);
