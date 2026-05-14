@@ -315,6 +315,12 @@
       drop.style.width = dropWidth + 'px';
 
       drop.classList.remove('hidden');
+
+      // 화면 아래로 잘리면 위쪽으로 뒤집기
+      const dropRect = drop.getBoundingClientRect();
+      if (dropRect.bottom > window.innerHeight - 8) {
+        drop.style.top = (rect.top - drop.offsetHeight - 4) + 'px';
+      }
       const input = drop.querySelector('input');
       if (input) {
         input.value = ''; 
@@ -324,9 +330,11 @@
     }
   }
 
-  // 스크롤/리사이즈 시 드롭다운 닫기
-  window.addEventListener('scroll', () => {
-    document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+  // 드롭다운 외부 스크롤 시만 닫기 (내부 스크롤은 무시)
+  window.addEventListener('scroll', (e) => {
+    if (!e.target.closest || !e.target.closest('.dropdown-menu')) {
+      document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
+    }
   }, true);
   window.addEventListener('resize', () => {
     document.querySelectorAll('.dropdown-menu').forEach(el => el.classList.add('hidden'));
