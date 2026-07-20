@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AxPRO | 업무보고·진행현황</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  :root{ --brand:#0066cc; --ink:#151a22; --muted:#8a909c; --line:#e7e9ef; --bg:#f2f4f8; --card:#fff;
+    --wait:#94a0b0; --prog:#0066cc; --prob:#ef3e36; --hold:#f59e0b; --done:#22b573; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
+  .ms{ font-family:'Material Symbols Outlined'; vertical-align:middle; line-height:1; }
+  button{ font-family:inherit; cursor:pointer; border:0; }
+  a{ text-decoration:none; color:inherit; }
+
+  #offlineBanner{ background:#fff7ed; border-bottom:1px solid #fed7aa; color:#9a3412; font-size:12px; font-weight:800; text-align:center; padding:7px; }
+  .topbar{ flex:none; display:flex; align-items:center; gap:14px; padding:11px 22px; background:#fff; border-bottom:1px solid var(--line); }
+  .brand{ font-size:19px; font-weight:900; letter-spacing:-.03em; color:var(--brand); }
+  .today{ font-size:13.5px; font-weight:800; } .today .g{ color:var(--muted); font-weight:700; }
+  .grow{ flex:1; }
+  .scope{ display:inline-flex; background:#e7eaf1; border-radius:9px; padding:3px; gap:2px; }
+  .scope button{ background:transparent; color:var(--muted); font-size:12.5px; font-weight:800; padding:6px 14px; border-radius:7px; }
+  .scope button.on{ background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .pill{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:var(--muted); background:#f1f3f7; border-radius:8px; padding:6px 11px; }
+  .pdot{ width:8px; height:8px; border-radius:50%; background:var(--done); } .pdot.blue{ background:var(--prog); } .pdot.rose{ background:var(--prob); } .pdot.amber{ background:var(--hold); }
+  .pdot.blue{ animation:pulse 1s infinite; } @keyframes pulse{ 50%{opacity:.4;} }
+  .iconbtn{ color:var(--muted); background:transparent; padding:5px; border-radius:8px; } .iconbtn:hover{ color:var(--brand); background:#eef2f8; }
+  .who{ font-size:12.5px; font-weight:700; color:var(--muted); }
+
+  .stage{ flex:1; display:grid; grid-template-columns:340px 1fr 430px; min-height:0; }
+  .stage.mgr{ grid-template-columns:1fr; }
+  .col{ min-height:0; overflow-y:auto; padding:16px 18px; }
+  .col.left{ border-right:1px solid var(--line); background:#fafbfd; }
+  .col.right{ border-left:1px solid var(--line); background:#fafbfd; display:flex; flex-direction:column; overflow:hidden; padding:0; }
+  .col::-webkit-scrollbar{ width:7px;height:7px; } .col::-webkit-scrollbar-thumb{ background:#d2d6de; border-radius:10px; }
+
+  .dl{ font-size:11px; font-weight:900; color:var(--brand); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+  .fld{ margin-bottom:8px; } .fld label{ font-size:10.5px; font-weight:800; color:var(--muted); display:block; margin:0 0 3px 2px; }
+  .fi{ width:100%; border:1px solid var(--line); background:#fff; border-radius:9px; font-size:13px; font-weight:600; padding:8px 10px; outline:0; color:var(--ink); font-family:inherit; }
+  select.fi{ font-weight:800; cursor:pointer; }
+  .frow{ display:flex; gap:7px; } .frow>*{ flex:1; }
+  .stseg{ display:flex; gap:4px; flex-wrap:wrap; } .stseg button{ font-size:11px; font-weight:800; padding:5px 8px; border-radius:6px; background:#f1f3f7; color:#7a828f; border:1.5px solid transparent; }
+  .stseg button.on{ background:#fff; }
+  .progseg{ display:flex; gap:3px; } .progseg button{ flex:1; font-size:11px; font-weight:800; padding:6px 0; border-radius:6px; background:#f1f3f7; color:#7a828f; } .progseg button.on{ background:var(--brand); color:#fff; }
+  .addbtn{ width:100%; margin-top:10px; background:var(--brand); color:#fff; font-size:14px; font-weight:800; padding:11px 0; border-radius:11px; } .addbtn:hover{ background:#0059b3; }
+
+  .cH{ display:flex; align-items:center; gap:9px; margin-bottom:12px; } .cH h2{ font-size:16px; font-weight:900; margin:0; }
+  .pgrp{ margin-bottom:16px; } .pgrp-h{ display:flex; align-items:center; gap:7px; margin-bottom:6px; }
+  .ptag{ font-size:12px; font-weight:900; color:var(--brand); background:#eaf2fd; padding:3px 10px; border-radius:7px; } .pgrp-h .pf{ font-size:11px; color:var(--muted); font-weight:600; }
+  .erow{ display:flex; align-items:center; gap:9px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; margin-bottom:5px; }
+  .erow.done{ opacity:.6; }
+  .check{ width:20px;height:20px;border-radius:50%;border:2px solid #d2d2d7;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer; } .check .ms{font-size:13px;opacity:0;} .check.done{background:var(--brand);border-color:var(--brand);} .check.done .ms{opacity:1;}
+  .econt{ flex:1; font-size:13px; font-weight:600; min-width:0; cursor:pointer; } .erow.done .econt{ text-decoration:line-through; color:#b0b6c0; }
+  .enote{ font-size:11px; color:var(--muted); font-weight:500; }
+  .emeta{ display:flex; align-items:center; gap:6px; flex:none; }
+  .ddl{ font-size:10.5px; font-weight:800; color:#8a909c; }
+  .ddl.overdue{ color:#ef3e36; font-weight:900; }
+  .edel{ color:#c2c6ce; flex:none; opacity:0; padding:2px; border-radius:5px; cursor:pointer; } .erow:hover .edel{ opacity:1; } .edel:hover{ color:#ef3e36; background:#fdeceb; }
+  .erow.editing{ outline:2px solid var(--brand); outline-offset:-1px; }
+  .stbadge{ font-size:10px; font-weight:900; padding:2px 7px; border-radius:6px; }
+  .prog-mini{ font-size:10.5px; font-weight:800; color:var(--muted); }
+
+  .rtabs{ display:flex; background:#fff; border-bottom:1px solid var(--line); flex:none; }
+  .rtabs button{ flex:1; background:transparent; font-size:12px; font-weight:800; color:var(--muted); padding:11px 0; border-bottom:2px solid transparent; }
+  .rtabs button.on{ color:var(--brand); border-bottom-color:var(--brand); }
+  .rbody{ flex:1; overflow:auto; padding:16px; background:#fff; }
+  .rbody::-webkit-scrollbar{ width:7px;height:7px; } .rbody::-webkit-scrollbar-thumb{ background:#d2d6de;border-radius:10px; }
+  .copybtn{ flex:none; padding:11px 0; background:#151a22; color:#fff; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; gap:7px; } .copybtn:hover{ background:#2a2f3a; }
+
+  .rep-mem{ margin-bottom:18px; } .rep-mem-h{ font-size:14px; font-weight:900; padding-bottom:5px; border-bottom:2px solid var(--ink); margin-bottom:8px; display:flex; gap:8px; align-items:baseline; }
+  .rep-mem-h .rk{ font-size:11px; color:var(--muted); font-weight:700; }
+  .rep-sub{ font-size:10.5px; font-weight:900; color:var(--muted); letter-spacing:.04em; margin:9px 0 3px; }
+  .rep-proj{ font-size:12.5px; font-weight:900; color:var(--brand); margin:8px 0 2px; }
+  .rep-line{ font-size:12.5px; font-weight:600; line-height:1.65; padding-left:3px; color:#2a2f3a; }
+  .rep-line .st{ font-weight:800; } .rep-line.prob{ color:var(--prob); } .rep-line .nt{ color:var(--muted); font-weight:500; }
+  .rep-none{ font-size:12px; color:var(--muted); font-weight:600; }
+
+  table.st{ width:100%; border-collapse:collapse; font-size:12px; }
+  table.st th{ background:#f2f4f8; font-weight:900; color:#5a616e; padding:7px 8px; text-align:left; border:1px solid var(--line); white-space:nowrap; font-size:11px; }
+  table.st td{ padding:7px 8px; border:1px solid var(--line); vertical-align:top; font-weight:600; }
+  table.st tr.team td{ background:#0b0d12; color:#fff; font-weight:900; letter-spacing:.03em; }
+  table.st tr.proj td{ background:#eaf2fd; color:var(--brand); font-weight:900; }
+  table.st .c-note{ color:var(--muted); font-weight:500; }
+  table.st .stb{ font-weight:900; font-size:11px; padding:2px 6px; border-radius:5px; display:inline-block; }
+
+  /* 일일업무보고 그리드 (엑셀 양식: 사람/팀 = 열) */
+  table.rep-grid{ width:100%; border-collapse:collapse; font-size:12px; table-layout:fixed; margin-bottom:22px; }
+  table.rep-grid th, table.rep-grid td{ border:1px solid var(--line); padding:9px 11px; vertical-align:top; text-align:left; overflow-wrap:anywhere; }
+  table.rep-grid .rowlbl{ background:#f2f4f8; font-weight:900; color:#5a616e; width:78px; white-space:nowrap; font-size:11px; text-align:center; }
+  table.rep-grid tr.teamhead td{ background:#0b0d12; color:#fff; font-weight:900; letter-spacing:.03em; font-size:13px; }
+  table.rep-grid tr.head th{ background:#eaf2fd; color:var(--brand); font-weight:900; text-align:center; font-size:12.5px; }
+  table.rep-grid tr.head th .rk{ font-weight:600; font-size:10px; color:#5a86bd; }
+  table.rep-grid .cellproj{ color:var(--brand); font-weight:900; display:block; margin-top:7px; }
+  table.rep-grid .cellproj:first-child{ margin-top:0; }
+  table.rep-grid .cellabbr{ display:block; font-weight:800; color:#5a616e; margin-top:2px; font-size:11.5px; }
+  table.rep-grid .cellline{ font-weight:600; line-height:1.55; color:#2a2f3a; padding-left:2px; }
+  table.rep-grid .cellline.prob{ color:var(--prob); } table.rep-grid .cellline .st{ font-weight:800; } table.rep-grid .cellline .nt{ color:var(--muted); font-weight:500; }
+  table.rep-grid .assign{ font-weight:600; color:#3a3f4a; } table.rep-grid .idle{ color:var(--muted); font-weight:600; font-size:11px; }
+  @media (prefers-color-scheme:dark){ table.rep-grid .rowlbl{ background:#20242e; color:#c7ccd6; } table.rep-grid tr.head th{ background:rgba(0,102,204,.16); } }
+
+  .mgrbar{ flex:none; background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+  .mgrbar .g{ display:flex; align-items:center; gap:8px; } .mgrbar .lbl{ font-size:10.5px; font-weight:900; color:var(--muted); letter-spacing:.06em; }
+  .mgrseg{ display:inline-flex; background:#eef1f6; border-radius:9px; padding:3px; gap:2px; }
+  .mgrseg button{ background:transparent; color:var(--muted); font-size:12.5px; font-weight:800; padding:7px 14px; border-radius:7px; }
+  .mgrseg button.on{ background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .mgrbody{ flex:1; overflow:auto; padding:22px 26px; } .mgrbody::-webkit-scrollbar{ width:9px;height:9px; } .mgrbody::-webkit-scrollbar-thumb{ background:#cdd2db;border-radius:10px; }
+  .mgr-sheet{ max-width:1180px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:16px; padding:24px 28px; box-shadow:0 2px 12px -6px rgba(0,0,0,.08); }
+  .mgr-title{ font-size:19px; font-weight:900; letter-spacing:-.02em; margin:0 0 3px; }
+  .mgr-sub{ font-size:12.5px; color:var(--muted); font-weight:700; margin-bottom:18px; }
+  .mgr-copy{ float:right; font-size:12px; font-weight:800; color:#fff; background:#151a22; padding:8px 15px; border-radius:9px; display:inline-flex; gap:6px; align-items:center; }
+
+  #toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:11px 22px; border-radius:99px; font-size:13px; font-weight:700; opacity:0; transition:.35s; z-index:400; box-shadow:0 10px 24px rgba(0,0,0,.18); pointer-events:none; max-width:90vw; }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(6px); }
+
+  @media (prefers-color-scheme:dark){
+    :root{ --ink:#eef1f6; --muted:#8b93a3; --line:#282c36; --bg:#0c0e13; --card:#161922; }
+    .topbar,.mgrbar,.rtabs,.rbody,.mgr-sheet{ background:#161922; } .col.left,.col.right{ background:#111318; }
+    .scope,.stseg button,.progseg button,.fi,select.fi,.mgrseg,.pill{ background:#20242e; color:#eef1f6; }
+    .scope button.on,.mgrseg button.on,.stseg button.on{ background:#2c313d; }
+    .erow,.ptag{ background:#1b1f28; } .ptag{ color:#7dd3fc; }
+    table.st th{ background:#20242e; color:#c7ccd6; } table.st tr.proj td{ background:rgba(0,102,204,.14); }
+    #offlineBanner{ background:rgba(234,88,12,.12); border-bottom-color:rgba(234,88,12,.3); color:#fdba74; }
+  }
+  /* 좁은 화면(모바일/태블릿): 3열 → 세로 스택 + 세로 스크롤 */
+  @media (max-width:900px){
+    body{ height:auto; min-height:100vh; overflow:auto; }
+    .stage{ grid-template-columns:1fr; }
+    .col{ overflow:visible; }
+    .col.left{ border-right:0; border-bottom:1px solid var(--line); }
+    .col.right{ border-left:0; border-top:1px solid var(--line); }
+    .topbar{ flex-wrap:wrap; gap:8px 12px; }
+    .mgrbar{ gap:10px 14px; }
+    .mgrbody{ padding:14px; } .mgr-sheet{ padding:16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="offlineBanner" class="hidden" style="display:none"></div>
+
+<div class="topbar">
+  <span class="brand">AxPRO</span>
+  <span class="today" id="todayLbl"></span>
+  <span class="grow"></span>
+  <span id="scopeWrap" class="scope">
+    <button class="on" onclick="setScope('일간',this)">일간</button>
+    <button onclick="setScope('주간',this)">주간</button>
+  </span>
+  <button id="modeBtn" onclick="toggleMode()" style="display:none;background:#151a22;color:#fff;font-size:12.5px;font-weight:800;padding:8px 15px;border-radius:9px;display:none;align-items:center;gap:6px"></button>
+  <span class="pill" id="statusPill"><span class="pdot" id="pdot"></span><span id="statusText">저장됨</span></span>
+  <span class="who" id="whoLbl"></span>
+  <a id="adminLink" href="settings.html" class="iconbtn" title="조직·과제 관리" style="display:none"><span class="ms" style="font-size:19px">settings</span></a>
+  <button class="iconbtn" title="로그아웃" onclick="AX.logout();location.replace('index.html')"><span class="ms" style="font-size:18px">logout</span></button>
+</div>
+
+<!-- 팀원 화면 -->
+<div class="stage" id="memberStage" style="display:none">
+  <div class="col left">
+    <div class="dl"><span class="ms" style="font-size:16px">edit_note</span> 업무 기록 — 적으면 진행현황·일일보고 동시 완성</div>
+    <div class="frow fld"><div><label>사업</label><select id="fProj" class="fi"></select></div><div><label>마감일</label><input id="fDdl" type="date" class="fi"></div></div>
+    <div class="fld"><label>세부내용</label><input id="fCont" class="fi" placeholder="수행/예정 업무 (Enter)" onkeypress="if(event.key==='Enter')addEntry()"></div>
+    <div class="fld"><label>비고</label><input id="fNote" class="fi" placeholder="from/to, > 후속 등 (선택)"></div>
+    <div class="fld"><label>진행상태</label><div class="stseg" id="fSt"></div></div>
+    <div class="fld"><label>진행도</label><div class="progseg" id="fPg"></div></div>
+    <button id="addBtn" class="addbtn" onclick="addEntry()">＋ 추가 (오늘 · <span id="kindLbl">일간</span>)</button>
+    <button id="cancelEdit" onclick="cancelEdit()" style="display:none;width:100%;margin-top:6px;background:#eef1f6;color:#5a616e;font-size:13px;font-weight:800;padding:9px 0;border-radius:10px">수정 취소</button>
+    <div style="margin-top:16px;font-size:11px;color:var(--muted);font-weight:600;line-height:1.6">이 한 줄이 → 가운데 <b>내 진행현황</b>에 카드로, 오른쪽 <b>일일보고/진행현황표</b>에 동시에 들어갑니다.</div>
+  </div>
+  <div class="col center" id="mCenter"></div>
+  <div class="col right">
+    <div class="rtabs" id="mRTabs">
+      <button class="on" onclick="setRTab('보고',this)">일일 업무보고</button>
+      <button onclick="setRTab('일간',this)">일간 진행현황</button>
+      <button onclick="setRTab('주간',this)">주간 진행현황</button>
+    </div>
+    <div class="rbody" id="mRBody"></div>
+    <button id="mCopyBtn" class="copybtn" onclick="copyReport('member')"><span class="ms" style="font-size:16px">content_copy</span> 이행내용 복사</button>
+  </div>
+</div>
+
+<!-- 관리자 관리화면 -->
+<div class="stage mgr" id="managerStage" style="display:none;">
+  <div class="mgrbar">
+    <div class="g"><span class="lbl">보기</span>
+      <div class="mgrseg" id="mgrView">
+        <button class="on" onclick="setMView('보고',this)">일일 업무보고</button>
+        <button onclick="setMView('일간',this)">일일 진행현황</button>
+        <button onclick="setMView('주간',this)">주간 진행현황</button>
+      </div></div>
+    <div class="g" id="mgrGroupWrap"><span class="lbl">그룹</span>
+      <div class="mgrseg" id="mgrGroup">
+        <button class="on" onclick="setMGroup('사업별',this)">사업별</button>
+        <button onclick="setMGroup('사용자별',this)">사용자별</button>
+      </div></div>
+    <div class="g" id="mgrRepWrap" style="display:none"><span class="lbl">형식</span>
+      <div class="mgrseg" id="mgrRep">
+        <button class="on" onclick="setMRep('팀별',this)">팀별</button>
+        <button onclick="setMRep('사람별',this)">사람별</button>
+      </div></div>
+    <div class="g"><span class="lbl">팀</span>
+      <div class="mgrseg" id="mgrTeam">
+        <button class="on" onclick="setMTeam('전체',this)">전체</button>
+        <button onclick="setMTeam('식품',this)">식품AX</button>
+        <button onclick="setMTeam('환경',this)">환경AX</button>
+      </div></div>
+  </div>
+  <div class="mgrbody"><div class="mgr-sheet" id="mgrSheet"></div></div>
+</div>
+
+<div id="toast"></div>
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+  if (!AX.requireAuth()) { throw new Error('로그인 필요 — index.html 로 이동'); }
+  const currentUser = AX.user() || { name:'', dept:'', rank:'', manager:false };
+  const isManager = !!currentUser.manager;
+  const ME = currentUser.name;
+  const role = isManager ? 'manager' : 'member';
+  if (isManager) document.getElementById('adminLink').style.display='';
+
+  function pad(n){return(n<10?'0':'')+n;}
+  function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  function weekMon(){var d=new Date();var D=(d.getDay()+6)%7;d.setDate(d.getDate()-D);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  const TODAY=today();
+  function ddlShort(d){ if(!d) return ''; return String(d).length>=10 ? String(d).slice(5).replace('-','.') : String(d); }
+  function memTeam(name){ const m=rawData.members.find(x=>x.name===name); return (m&&(m.dept||'').includes('환경'))?'환경AX':'식품AX'; }
+  function projBy(short){ return rawData.projects.find(p=>p.short_name===short)||{}; }
+
+  const STATUS=['대기','진행중','완료','보류','문제발생'];
+  const STCOLOR={대기:'#94a0b0',진행중:'#0066cc',완료:'#22b573',보류:'#f59e0b',문제발생:'#ef3e36'};
+  const STBG={대기:'#eef1f5',진행중:'#eaf2fd',완료:'#e6f7ef',보류:'#fdf2e0',문제발생:'#fdeceb'};
+  const order={문제발생:0,진행중:1,보류:2,대기:3,완료:4};
+
+  let rawData={ entries:[], projects:[], members:[] };
+  let scope='일간', rtab='보고', mode='내업무', mView='보고', mGroup='사업별', mRep='팀별', mTeam=null;
+  let form={status:'진행중', progress:0};
+  const pendingSnap={};
+  const isChief = /실장|본부장|대표|사장|부사장|전무|상무|이사/.test((currentUser.rank||'')+' '+(currentUser.role||''));
+
+  // ---- 저장 상태 ----
+  AX.onStatus(function(s){
+    const dot=document.getElementById('pdot'), txt=document.getElementById('statusText'), ban=document.getElementById('offlineBanner');
+    dot.className='pdot';
+    if(s.offline){ dot.classList.add('rose'); txt.textContent='오프라인 · 대기 '+s.pending; ban.style.display='block'; ban.textContent='서버 연결 실패 — 변경은 대기열에 쌓이며 복구 시 전송됩니다.'; }
+    else if(s.pending>0||s.phase==='syncing'){ dot.classList.add('blue'); txt.textContent='저장 중…'; ban.style.display='none'; }
+    else { txt.textContent='저장됨'; ban.style.display='none'; }
+  });
+
+  // ---- 서버 결과 반영 ----
+  AX.onApply(function(sheet,r){
+    if(sheet!=='entries') return;
+    const snap=pendingSnap[r.opId]; delete pendingSnap[r.opId];
+    let i=rawData.entries.findIndex(t=>t.id===r.id);
+    if(r.status==='applied'){ if(i>-1){ const mp=AX.hasPending('entries',r.id,r.opId); if(r.serverRow&&!mp) rawData.entries[i]=normE(r.serverRow); else if(r.rev!=null) rawData.entries[i].rev=r.rev; } }
+    else if(r.status==='conflict'){ if(r.serverRow){ if(i>-1)rawData.entries[i]=normE(r.serverRow); else if(r.serverRow.deleted!==true)rawData.entries.push(normE(r.serverRow)); } toast('다른 사용자가 먼저 수정 — 최신본으로 갱신'); rerender(); }
+    else if(r.status==='error'){ if(snap){ if(snap.kind==='create'){ if(i>-1)rawData.entries.splice(i,1); } else if(snap.kind==='edit'){ if(i>-1)rawData.entries[i]=normE(snap.prev); } else if(snap.kind==='delete'){ if(i<0)rawData.entries.push(normE(snap.prev)); } rerender(); } toast('저장 거부: '+(r.error||'')+' — 되돌렸습니다.'); }
+  });
+
+  window.onload = init;
+  async function init(){
+    let res;
+    try{ res=await AX.pull(['entries','projects','members']); }catch(e){ res={data:{},fromCache:true,hasCache:false}; toast('불러오기 실패 — 잠시 후 새로고침'); }
+    rawData.entries=(res.data.entries||[]).filter(nd).map(normE);
+    rawData.projects=(res.data.projects||[]).filter(nd).sort((a,b)=>(+a.order||999)-(+b.order||999));
+    rawData.members=(res.data.members||[]).filter(nd);
+    if(res.fromCache&&!res.hasCache) toast('연결 실패 — 표시할 캐시가 없습니다.');
+    setupForm();
+    restoreView();
+    if(mTeam===null) mTeam = isChief ? '전체' : (memTeam(ME).includes('환경')?'환경':'식품');
+    document.getElementById('modeBtn').style.display = isManager?'inline-flex':'none';
+    applyMode();
+    AX.drain();
+  }
+  function nd(r){ return r.deleted!==true && r.deleted!=='TRUE'; }
+  function normE(t){ t.progress=(t.progress===''||t.progress==null)?0:+t.progress; return t; }
+
+  function weekFri(){ var d=new Date(); var D=(d.getDay()+6)%7; d.setDate(d.getDate()-D+4); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function defDdl(){ return scope==='주간'?weekFri():TODAY; }
+  function setupForm(){
+    // 사업 드롭다운: 내 팀 우선 정렬
+    const myTeam = memTeam(ME);
+    const ps=[...rawData.projects].sort((a,b)=>{ const aM=a.team===myTeam,bM=b.team===myTeam; return aM===bM?0:aM?-1:1; });
+    const fp=document.getElementById('fProj');
+    if(!ps.length){ fp.innerHTML='<option value="">등록된 과제 없음 — 관리자에게 요청</option>'; document.getElementById('addBtn').disabled=true; }
+    else { const teams=[...new Set(ps.map(p=>p.team||'기타'))];
+      fp.innerHTML=teams.map(tm=>'<optgroup label="'+esc(tm)+'">'+ps.filter(p=>(p.team||'기타')===tm).map(p=>`<option value="${esc(p.short_name)}">${esc(p.short_name)} — ${esc(p.full_name||'')}</option>`).join('')+'</optgroup>').join(''); }
+    document.getElementById('fSt').innerHTML=STATUS.map(s=>`<button data-s="${s}" onclick="pickSt('${s}',this)" style="color:${STCOLOR[s]}">${s}</button>`).join('');
+    document.getElementById('fPg').innerHTML=[0,25,50,75,100].map(v=>`<button data-p="${v}" onclick="pickPg(${v},this)">${v}</button>`).join('');
+    document.getElementById('fDdl').value=defDdl();
+    pickSt('진행중',document.querySelector('#fSt [data-s="진행중"]')); pickPg(0,document.querySelector('#fPg [data-p="0"]'));
+  }
+  function saveView(){ try{ sessionStorage.setItem('ax_view', JSON.stringify({mode:mode,mView:mView,mGroup:mGroup,mRep:mRep,mTeam:mTeam,scope:scope,rtab:rtab})); }catch(e){} }
+  function restoreView(){ try{ var v=JSON.parse(sessionStorage.getItem('ax_view')||'null'); if(!v)return; if(v.mode)mode=v.mode; if(v.mView)mView=v.mView; if(v.mGroup)mGroup=v.mGroup; if(v.mRep)mRep=v.mRep; if(v.mTeam)mTeam=v.mTeam; if(v.scope)scope=v.scope; if(v.rtab)rtab=v.rtab; document.getElementById('kindLbl').textContent=scope; }catch(e){} }
+  function syncToggles(){ var act=function(sel,val){ document.querySelectorAll(sel+' button').forEach(function(b){ b.classList.toggle('on',(b.getAttribute('onclick')||'').indexOf("'"+val+"'")>-1); }); }; act('#scopeWrap',scope); act('#mgrView',mView); act('#mgrGroup',mGroup); act('#mgrRep',mRep); document.querySelectorAll('#mgrTeam button').forEach(function(b){ b.classList.toggle('on',(mTeam==='전체'&&b.textContent==='전체')||(mTeam!=='전체'&&b.textContent.indexOf(mTeam)===0)); }); }
+  function applyMode(){
+    const mine = mode==='내업무';
+    document.getElementById('memberStage').style.display=mine?'grid':'none';
+    document.getElementById('managerStage').style.display=mine?'none':'grid';
+    document.getElementById('scopeWrap').style.display=mine?'inline-flex':'none';
+    document.getElementById('whoLbl').textContent=`${currentUser.dept||''} ${ME} ${currentUser.rank||''}`.trim();
+    if(isManager) document.getElementById('modeBtn').innerHTML = mine?'<span class="ms" style="font-size:16px">groups</span> 팀 관리':'<span class="ms" style="font-size:16px">arrow_back</span> 내 업무';
+    syncToggles();
+    upTitle(); mine?renderMember():renderManager();
+    saveView();
+  }
+  function toggleMode(){ mode=mode==='내업무'?'관리':'내업무'; applyMode(); }
+  function upTitle(){ document.getElementById('todayLbl').innerHTML=(mode==='관리'?'팀 관리':'내 업무')+' <span class="g">· '+(mode==='관리'?'':scope+' · ')+TODAY.replace(/-/g,'.')+'</span>'; }
+  function setScope(v,b){ scope=v; document.querySelectorAll('#scopeWrap button').forEach(x=>x.classList.remove('on')); if(b)b.classList.add('on'); document.getElementById('kindLbl').textContent=v; if(!editingId)document.getElementById('fDdl').value=defDdl(); upTitle(); renderMember(); saveView(); }
+  function pickSt(s,b){ form.status=s; document.querySelectorAll('#fSt button').forEach(x=>{x.classList.remove('on');x.style.background='';}); b.classList.add('on'); b.style.background=STCOLOR[s]+'22'; if(s==='완료'){form.progress=100;syncPg();} }
+  function pickPg(v,b){ form.progress=v; syncPg(); }
+  function syncPg(){ document.querySelectorAll('#fPg button').forEach(x=>x.classList.toggle('on',+x.dataset.p===form.progress)); }
+  function rerender(){ isManager?renderManager():renderMember(); }
+
+  // ---- 저장 (단일 경로) ----
+  let editingId=null;
+  function addEntry(){
+    const content=document.getElementById('fCont').value.trim(); if(!content) return toast('세부내용을 입력하세요.');
+    const proj=document.getElementById('fProj').value; if(!proj) return toast('사업을 선택하세요.');
+    const p=projBy(proj);
+    const fields={ project:proj, team:p.team||memTeam(ME), content, deadline:document.getElementById('fDdl').value,
+      status:form.status, progress:form.status==='완료'?100:form.progress, note:document.getElementById('fNote').value.trim() };
+    if(editingId){ patchEntry(editingId, fields); cancelEdit(); return; }   // 수정 저장
+    const id='E-'+AX.uuid();
+    fields.date=(scope==='주간'?weekMon():TODAY); fields.kind=scope; fields.member=ME;
+    rawData.entries.unshift(normE(Object.assign({id,rev:0,deleted:false,updated_at:new Date().toISOString(),updated_by:ME},fields)));
+    const opId=AX.enqueue({ sheet:'entries', type:'upsert', id, baseRev:0, fields });
+    pendingSnap[opId]={kind:'create',id};
+    document.getElementById('fCont').value=''; document.getElementById('fNote').value='';
+    renderMember();
+  }
+  function patchEntry(id,ch){
+    const i=rawData.entries.findIndex(x=>x.id===id); if(i<0)return;
+    if(!isManager && rawData.entries[i].member!==ME) return toast('본인 업무만 수정할 수 있습니다.');
+    const prev=JSON.parse(JSON.stringify(rawData.entries[i]));
+    const baseRev=+rawData.entries[i].rev||0;
+    if(ch.status==='완료' && ch.progress==null) ch.progress=100;
+    Object.assign(rawData.entries[i],ch,{updated_at:new Date().toISOString(),updated_by:ME}); normE(rawData.entries[i]);
+    const opId=AX.enqueue({ sheet:'entries', type:'upsert', id, baseRev, fields:Object.assign({},ch) });
+    pendingSnap[opId]={kind:'edit',id,prev};
+    rerender();
+  }
+  function toggleDone(id){ const t=rawData.entries.find(x=>x.id===id); patchEntry(id, t.status==='완료'?{status:'진행중'}:{status:'완료',progress:100}); }
+  function editEntry(id){   // 왼쪽 입력폼을 그 업무로 채워 전 항목(상태·진행도·마감일·비고·사업) 수정
+    const t=rawData.entries.find(x=>x.id===id); if(!t)return; if(!isManager&&t.member!==ME) return toast('본인 업무만 수정 가능');
+    editingId=id;
+    if(t.kind!==scope){ const b=document.querySelector('#scopeWrap button[onclick*="\''+t.kind+'\'"]'); if(b) setScope(t.kind,b); }
+    document.getElementById('fProj').value=t.project;
+    document.getElementById('fDdl').value=(t.deadline&&String(t.deadline).length>=10)?t.deadline:'';
+    document.getElementById('fCont').value=t.content;
+    document.getElementById('fNote').value=t.note||'';
+    const sb=document.querySelector('#fSt [data-s="'+t.status+'"]'); if(sb) pickSt(t.status,sb);
+    form.progress=+t.progress||0; syncPg();
+    document.getElementById('addBtn').innerHTML='수정 저장';
+    document.getElementById('cancelEdit').style.display='block';
+    renderMyBoard();
+  }
+  function cancelEdit(){
+    editingId=null;
+    document.getElementById('addBtn').innerHTML='＋ 추가 (오늘 · <span id="kindLbl">'+scope+'</span>)';
+    document.getElementById('cancelEdit').style.display='none';
+    document.getElementById('fCont').value=''; document.getElementById('fNote').value=''; document.getElementById('fDdl').value=defDdl();
+    const sb=document.querySelector('#fSt [data-s="진행중"]'); if(sb) pickSt('진행중',sb); pickPg(0,document.querySelector('#fPg [data-p="0"]'));
+    renderMyBoard();
+  }
+  function deleteEntry(id){
+    const t=rawData.entries.find(x=>x.id===id); if(!t)return; if(!isManager&&t.member!==ME) return toast('본인 업무만 삭제 가능');
+    if(!confirm('이 업무를 삭제할까요? (복구 가능한 소프트 삭제)')) return;
+    const i=rawData.entries.findIndex(x=>x.id===id); const prev=JSON.parse(JSON.stringify(t));
+    const opId=AX.enqueue({sheet:'entries',type:'delete',id,baseRev:+t.rev||0,fields:{}});
+    pendingSnap[opId]={kind:'delete',id,prev};
+    rawData.entries.splice(i,1);
+    if(editingId===id) cancelEdit(); else rerender();
+  }
+
+  // ================= 팀원 =================
+  function renderMember(){ upTitle(); renderMyBoard(); setRTab(rtab); }
+  function myE(){ return rawData.entries.filter(t=>t.member===ME && t.kind===scope); }
+  function renderMyBoard(){
+    const c=document.getElementById('mCenter'); const mine=myE();
+    const byP={}; mine.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+    let h=`<div class="cH"><h2>내 ${scope} 진행현황</h2><span style="font-size:12px;color:var(--muted);font-weight:700">${mine.length}건 · 사업 ${Object.keys(byP).length}개</span></div>`;
+    if(!mine.length) h+=`<div class="rep-none" style="margin-top:30px">${scope} 기록이 없어요. 왼쪽에서 한 줄 적어보세요.</div>`;
+    rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{
+      const its=byP[p.short_name].sort((a,b)=>order[a.status]-order[b.status]);
+      h+=`<div class="pgrp"><div class="pgrp-h"><span class="ptag">${esc(p.short_name)}</span><span class="pf">${esc(p.full_name||'')}</span></div>`;
+      its.forEach(t=>{ const done=t.status==='완료'; const od=t.deadline&&String(t.deadline).length>=10&&t.deadline<TODAY&&!done;
+        h+=`<div class="erow ${done?'done':''} ${t.id===editingId?'editing':''}">
+          <div class="check ${done?'done':''}" onclick="toggleDone('${t.id}')"><span class="ms">check</span></div>
+          <span class="econt" onclick="editEntry('${t.id}')">${esc(t.content)}${t.note?` <span class="enote">(${esc(t.note)})</span>`:''}</span>
+          <span class="emeta">${t.deadline?`<span class="ddl${od?' overdue':''}">~${ddlShort(t.deadline)}</span>`:''}<span class="prog-mini">${t.progress}%</span><span class="stbadge" style="color:${STCOLOR[t.status]};background:${STBG[t.status]}">${t.status}</span><span class="edel ms" onclick="event.stopPropagation();deleteEntry('${t.id}')" title="삭제">close</span></span></div>`;
+      });
+      h+=`</div>`;
+    });
+    c.innerHTML=h;
+  }
+  function setRTab(v,b){ rtab=v; document.querySelectorAll('#mRTabs button').forEach(x=>x.classList.toggle('on',(x.getAttribute('onclick')||'').indexOf("'"+v+"'")>-1));
+    const body=document.getElementById('mRBody');
+    body.innerHTML = v==='보고' ? reportNarrative([ME],false) : statusTable(v==='일간'?'일간':'주간','사업별',[ME]);
+    document.getElementById('mCopyBtn').style.display = v==='보고'?'flex':'none';   // 이행내용만 복사, 진행현황은 복사 없음
+    saveView();
+  }
+
+  // ================= 관리자 =================
+  function renderManager(){ upTitle();
+    document.getElementById('mgrGroupWrap').style.display = mView==='보고'?'none':'flex';
+    document.getElementById('mgrRepWrap').style.display = mView==='보고'?'flex':'none';
+    const teamMembers=rawData.members.filter(m=>mTeam==='전체'||memTeam(m.name).indexOf(mTeam)===0).map(m=>m.name);
+    const title = mView==='보고'?'일일 업무보고':mView==='일간'?'일일 업무진행현황':'주간 업무진행현황';
+    const teamLbl = mTeam==='전체'?'식품AX+환경AX':mTeam+'AX';
+    const sub = TODAY.replace(/-/g,'.')+' · '+teamLbl+(mView==='보고'?' · '+mRep:' · '+mGroup);
+    const bodyHtml = mView==='보고' ? (mRep==='팀별'?reportTeamGrid(teamMembers):reportPersonGrid(teamMembers)) : statusTable(mView,mGroup,teamMembers);
+    const copyBtn = mView==='보고' ? `<button class="mgr-copy" onclick="copyReport('manager')"><span class="ms" style="font-size:15px">content_copy</span> 이행내용 복사</button>` : '';
+    document.getElementById('mgrSheet').innerHTML=copyBtn+`<div class="mgr-title">${title}</div><div class="mgr-sub">${esc(sub)}</div>${bodyHtml}`;
+  }
+  function setMView(v,b){ mView=v; document.querySelectorAll('#mgrView button').forEach(x=>x.classList.remove('on'));b.classList.add('on'); renderManager(); saveView(); }
+  function setMGroup(v,b){ mGroup=v; document.querySelectorAll('#mgrGroup button').forEach(x=>x.classList.remove('on'));b.classList.add('on'); renderManager(); saveView(); }
+  function setMRep(v,b){ mRep=v; document.querySelectorAll('#mgrRep button').forEach(x=>x.classList.remove('on'));b.classList.add('on'); renderManager(); saveView(); }
+  function setMTeam(v,b){ mTeam=v; document.querySelectorAll('#mgrTeam button').forEach(x=>x.classList.remove('on'));b.classList.add('on'); renderManager(); saveView(); }
+
+  // ---- 일일업무보고 서술형 ----
+  function reportNarrative(memberNames, mgr){
+    const renderMem=(nm)=>{
+      const m=rawData.members.find(x=>x.name===nm)||{};
+      const mine=rawData.entries.filter(t=>t.member===nm && t.kind==='일간');
+      const allProj=[...new Set(rawData.entries.filter(t=>t.member===nm).map(t=>t.project))];
+      const byP={}; mine.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+      const idle=allProj.filter(p=>!byP[p]);
+      let s=`<div class="rep-mem"><div class="rep-mem-h">${esc(nm)} <span class="rk">${esc(m.rank||'')}</span></div>`;
+      s+=`<div class="rep-sub">담당과제</div><div class="rep-line">${esc(allProj.join(', ')||'-')}</div>`;
+      s+=`<div class="rep-sub">이행내용</div>`;
+      if(!Object.keys(byP).length) s+=`<div class="rep-none">기록 없음</div>`;
+      rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{
+        s+=`<div class="rep-proj">[${esc(p.short_name)}]</div>`;
+        byP[p.short_name].sort((a,b)=>order[a.status]-order[b.status]).forEach(t=>{
+          s+=`<div class="rep-line">- ${esc(t.content)}${t.note?` <span class="nt">(${esc(t.note)})</span>`:''}</div>`;
+        });
+      });
+      s+=`<div class="rep-sub">미진행 과제</div><div class="rep-line">${idle.length?'* '+esc(idle.join(', '))+' 진행사항 없음':'* 없음'}</div></div>`;
+      return s;
+    };
+    let html='';
+    if(mgr){ const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))];
+      teams.forEach(tm=>{ html+=`<div style="font-weight:900;font-size:15px;color:var(--brand);margin:14px 0 8px">${esc(tm)}</div>`;
+        rawData.members.filter(m=>memTeam(m.name)===tm && memberNames.includes(m.name)).forEach(m=>html+=renderMem(m.name)); }); }
+    else memberNames.forEach(nm=>html+=renderMem(nm));
+    return html || `<div class="rep-none">기록이 없습니다.</div>`;
+  }
+
+  function abbrOf(nm){ return (rawData.members.find(m=>m.name===nm)||{}).abbr || String(nm).slice(-1); }
+  // 한 사람의 이행내용 ([사업] - 내용(비고)) — 엑셀 서술 그대로, 상태/이름 미표기
+  function ihaengCell(nm){
+    const mine=rawData.entries.filter(t=>t.member===nm && t.kind==='일간');
+    const byP={}; mine.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+    if(!Object.keys(byP).length) return '<span class="idle">진행사항 없음</span>';
+    let s='';
+    rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{
+      s+=`<span class="cellproj">[${esc(p.short_name)}]</span>`;
+      byP[p.short_name].forEach(t=>{ s+=`<div class="cellline">- ${esc(t.content)}${t.note?` <span class="nt">(${esc(t.note)})</span>`:''}</div>`; });
+    });
+    return s;
+  }
+  function idleOf(nm){ const all=[...new Set(rawData.entries.filter(t=>t.member===nm).map(t=>t.project))]; const td=[...new Set(rawData.entries.filter(t=>t.member===nm&&t.kind==='일간').map(t=>t.project))]; return all.filter(p=>!td.includes(p)); }
+
+  // ---- 사람별: 엑셀 2번째 시트(사람=열, 행=담당과제/이행내용/미진행) ----
+  function reportPersonGrid(memberNames){
+    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))];
+    let html='';
+    teams.forEach(tm=>{
+      const ppl=rawData.members.filter(m=>memTeam(m.name)===tm && memberNames.includes(m.name));
+      if(!ppl.length) return;
+      html+=`<table class="rep-grid"><colgroup><col style="width:78px">${ppl.map(()=>'<col>').join('')}</colgroup>`;
+      html+=`<tr class="teamhead"><td colspan="${ppl.length+1}">${esc(tm)}</td></tr>`;
+      html+=`<tr class="head"><th></th>${ppl.map(m=>`<th>${esc(m.name)} <span class="rk">${esc(m.rank||'')}</span></th>`).join('')}</tr>`;
+      html+=`<tr><td class="rowlbl">담당과제</td>${ppl.map(m=>{ const pj=[...new Set(rawData.entries.filter(t=>t.member===m.name).map(t=>t.project))]; return `<td class="assign">${esc(pj.join(', ')||'-')}</td>`; }).join('')}</tr>`;
+      html+=`<tr><td class="rowlbl">이행내용</td>${ppl.map(m=>`<td>${ihaengCell(m.name)}</td>`).join('')}</tr>`;
+      html+=`<tr><td class="rowlbl">미진행<br>과제</td>${ppl.map(m=>{ const idle=idleOf(m.name); return `<td class="idle">${idle.length?'* '+esc(idle.join(', '))+' 진행사항 없음':'* 없음'}</td>`; }).join('')}</tr>`;
+      html+=`<tr><td class="rowlbl">성과</td>${ppl.map(()=>`<td class="idle">* 성과 업데이트 없음</td>`).join('')}</tr>`;
+      html+=`</table>`;
+    });
+    return html || `<div class="rep-none">기록이 없습니다.</div>`;
+  }
+
+  // ---- 팀별: 엑셀 1번째 시트(팀=열, 이행내용에 [담당자] 표기) ----
+  function reportTeamGrid(memberNames){
+    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))];
+    if(!teams.length) return `<div class="rep-none">기록이 없습니다.</div>`;
+    const teamCell=(tm)=>{
+      const te=rawData.entries.filter(t=>t.kind==='일간'&&memTeam(t.member)===tm&&memberNames.includes(t.member));
+      const byP={}; te.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+      if(!Object.keys(byP).length) return '<span class="idle">진행사항 없음</span>';
+      let s='';
+      rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{
+        s+=`<span class="cellproj">[${esc(p.short_name)}]</span>`;
+        const byM={}; byP[p.short_name].forEach(t=>{(byM[t.member]=byM[t.member]||[]).push(t);});
+        Object.keys(byM).forEach(mn=>{
+          s+=`<span class="cellabbr">[${esc(abbrOf(mn))}]</span>`;   // 엑셀: 사업 아래 약어별로
+          byM[mn].forEach(t=>{ s+=`<div class="cellline">- ${esc(t.content)}${t.note?` <span class="nt">(${esc(t.note)})</span>`:''}</div>`; });
+        });
+      });
+      return s;
+    };
+    const lead=(tm)=>{ const l=rawData.members.find(m=>memTeam(m.name)===tm && /팀장|실장/.test(m.rank||'')); return l?`<span class="rk">${esc(l.name)} ${esc(l.rank)}</span>`:''; };
+    const idleTeam=(tm)=>{ const ppl=rawData.members.filter(m=>memTeam(m.name)===tm&&memberNames.includes(m.name)); const all=[...new Set(rawData.entries.filter(t=>ppl.some(m=>m.name===t.member)).map(t=>t.project))]; const td=[...new Set(rawData.entries.filter(t=>ppl.some(m=>m.name===t.member)&&t.kind==='일간').map(t=>t.project))]; return all.filter(p=>!td.includes(p)); };
+    let html=`<table class="rep-grid"><colgroup><col style="width:78px">${teams.map(()=>'<col>').join('')}</colgroup>`;
+    html+=`<tr class="head"><th></th>${teams.map(tm=>`<th>${esc(tm)}<br>${lead(tm)}</th>`).join('')}</tr>`;
+    html+=`<tr><td class="rowlbl">이행내용</td>${teams.map(tm=>`<td>${teamCell(tm)}</td>`).join('')}</tr>`;
+    html+=`<tr><td class="rowlbl">미진행</td>${teams.map(tm=>{ const idle=idleTeam(tm); return `<td class="idle">${idle.length?'* '+esc(idle.join(', '))+' 진행사항 없음':'* 없음'}</td>`; }).join('')}</tr>`;
+    html+=`<tr><td class="rowlbl">성과</td>${teams.map(()=>`<td class="idle">* 성과 업데이트 없음</td>`).join('')}</tr>`;
+    html+=`</table>`;
+    return html;
+  }
+  // 이행내용만 텍스트로 (복사용)
+  function buildIhaeng(memberNames, mgr){
+    let txt='';
+    if(mgr && mRep==='팀별'){
+      [...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))].forEach(tm=>{ txt+='['+tm+']\n';
+        const te=rawData.entries.filter(t=>t.kind==='일간'&&memTeam(t.member)===tm&&memberNames.includes(t.member));
+        const byP={}; te.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+        rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{ txt+='['+p.short_name+']\n';
+          const byM={}; byP[p.short_name].forEach(t=>{(byM[t.member]=byM[t.member]||[]).push(t);});
+          Object.keys(byM).forEach(mn=>{ txt+='['+abbrOf(mn)+']\n'; byM[mn].forEach(t=>{ txt+='- '+t.content+(t.note?' ('+t.note+')':'')+'\n'; }); }); });
+        txt+='\n'; });
+    } else {
+      memberNames.filter(nm=>rawData.entries.some(t=>t.member===nm&&t.kind==='일간')).forEach(nm=>{
+        if(mgr) txt+='['+nm+']\n';
+        const mine=rawData.entries.filter(t=>t.member===nm&&t.kind==='일간');
+        const byP={}; mine.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+        rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{ txt+='['+p.short_name+']\n';
+          byP[p.short_name].forEach(t=>{ txt+='- '+t.content+(t.note?' ('+t.note+')':'')+'\n'; }); });
+        txt+='\n';
+      });
+    }
+    return txt.trim();
+  }
+
+  // ---- 진행현황 표 ----
+  function statusTable(kind, groupBy, memberNames){
+    let rows=rawData.entries.filter(t=>t.kind===kind && memberNames.includes(t.member));
+    if(!rows.length) return `<div class="rep-none">해당 조건의 업무가 없습니다.</div>`;
+    let html=`<table class="st"><thead><tr><th>프로젝트</th><th>담당자</th><th>세부내용</th><th>마감일</th><th>진행상태</th><th>진행도</th><th>비고</th></tr></thead><tbody>`;
+    const rowH=t=>{ const od=t.deadline&&String(t.deadline).length>=10&&t.deadline<TODAY&&t.status!=='완료'; return `<tr><td style="font-weight:800;color:var(--brand)">${esc(t.project)}</td><td>${esc(t.member)}</td><td>${esc(t.content)}</td><td style="${od?'color:#ef3e36;font-weight:900':''}">${esc(ddlShort(t.deadline))||'-'}</td><td><span class="stb" style="color:${STCOLOR[t.status]};background:${STBG[t.status]}">${t.status}</span></td><td style="text-align:center">${t.progress}%</td><td class="c-note">${esc(t.note||'')}</td></tr>`; };
+    if(groupBy==='사업별'){
+      const teams=[...new Set(rows.map(t=>t.team))].sort();
+      teams.forEach(tm=>{ html+=`<tr class="team"><td colspan="7">${esc(tm)}</td></tr>`;
+        rawData.projects.filter(p=>p.team===tm && rows.some(t=>t.project===p.short_name)).forEach(p=>{
+          html+=`<tr class="proj"><td colspan="7">[${esc(p.short_name)}] ${esc(p.full_name||'')}</td></tr>`;
+          rows.filter(t=>t.project===p.short_name).sort((a,b)=>order[a.status]-order[b.status]).forEach(t=>html+=rowH(t));
+        }); });
+    } else {
+      rawData.members.filter(m=>memberNames.includes(m.name)&&rows.some(t=>t.member===m.name)).forEach(m=>{
+        html+=`<tr class="team"><td colspan="7">${esc(m.name)} ${esc(m.rank||'')} · ${esc(memTeam(m.name))}</td></tr>`;
+        rows.filter(t=>t.member===m.name).sort((a,b)=>order[a.status]-order[b.status]).forEach(t=>html+=rowH(t));
+      });
+    }
+    return html+`</tbody></table>`;
+  }
+
+  function copyReport(who){
+    const names = who==='member' ? [ME] : rawData.members.filter(m=>mTeam==='전체'||memTeam(m.name).indexOf(mTeam)===0).map(m=>m.name);
+    const txt = buildIhaeng(names, who==='manager');
+    navigator.clipboard.writeText(txt).then(()=>toast('이행내용을 복사했습니다.'));
+  }
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+</script>
+</body>
+</html>
