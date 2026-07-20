@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AxPRO | 구성원 관리</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL,GRAD@100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<style>
+  body{ font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; background:#f1f5f9; color:#111827; -webkit-font-smoothing:antialiased; margin:0; }
+  .ms{ font-family:'Material Symbols Outlined'; vertical-align:middle; line-height:1; }
+  .form-input{ width:100%; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:11px 14px; font-size:14px; font-weight:600; outline:none; color:#111827; }
+  .form-input:focus{ background:#fff; border-color:#0066cc; box-shadow:0 0 0 3px rgba(0,102,204,.1); }
+  .overlay{ position:fixed; inset:0; background:rgba(15,23,42,.3); backdrop-filter:blur(8px); z-index:100; display:none; align-items:center; justify-content:center; padding:16px; }
+  .overlay.active{ display:flex; }
+  #toast{ position:fixed; top:16px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:11px 24px; border-radius:99px; font-size:13px; font-weight:700; opacity:0; transition:.35s; z-index:400; }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(6px); }
+  @media (prefers-color-scheme:dark){
+    body{ background:#0b0e15; color:#e5ecf6; }
+    .form-input{ background:#1b2231; border-color:#2a3446; color:#e5ecf6; }
+    .bg-white{ background:#141a26 !important; } .border-slate-200,.border-slate-100{ border-color:#2a3446 !important; }
+    .text-slate-800{ color:#e5ecf6 !important; } .text-slate-500,.text-slate-400{ color:#8b98ad !important; } .bg-slate-50{ background:#161d2a !important; }
+  }
+</style>
+</head>
+<body>
+<div class="max-w-[1100px] mx-auto p-5 lg:p-8">
+  <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
+    <div>
+      <h1 class="text-xl font-black text-slate-800">구성원 관리</h1>
+      <p id="memberCount" class="text-[12px] font-bold text-slate-400 mt-1">불러오는 중...</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-400"><div id="dot" class="w-2 h-2 rounded-full bg-emerald-500"></div><span id="stat">저장됨</span></div>
+      <a href="app.html" class="text-[12px] font-bold text-slate-500 hover:text-[#0066cc] px-3 py-2 rounded-lg transition flex items-center gap-1"><span class="ms text-[17px]">arrow_back</span> 보드</a>
+      <button onclick="openEdit(-1)" class="bg-[#0066cc] text-white text-[13px] font-bold px-4 py-2.5 rounded-lg hover:bg-blue-700 transition flex items-center gap-1"><span class="ms text-[17px]">person_add</span> 새 멤버</button>
+    </div>
+  </div>
+  <div id="list" class="flex flex-col gap-2"><div class="text-center text-slate-400 text-[13px] font-bold py-16">불러오는 중...</div></div>
+</div>
+
+<div class="overlay" id="modal">
+  <div class="bg-white rounded-2xl w-full max-w-[600px] p-7 relative shadow-2xl max-h-[90vh] overflow-y-auto">
+    <button onclick="close_()" class="absolute top-5 right-5 text-slate-400 hover:text-rose-500"><span class="ms text-[22px]">close</span></button>
+    <h3 class="text-[13px] font-black tracking-widest text-slate-400 mb-5 uppercase">Member Details</h3>
+    <input type="hidden" id="eIdx"><input type="hidden" id="eId"><input type="hidden" id="eRev">
+    <div class="grid grid-cols-2 gap-3">
+      <div><label class="lb">성명 *</label><input id="eName" class="form-input font-black"></div>
+      <div><label class="lb">약어</label><input id="eAbbr" class="form-input text-center font-black"></div>
+      <div><label class="lb">부서</label><input id="eDept" class="form-input" placeholder="식품 AX팀" list="deptL"><datalist id="deptL"></datalist></div>
+      <div><label class="lb">직급</label><input id="eRank" class="form-input" list="rankL"><datalist id="rankL"><option value="대표"><option value="본부장"><option value="실장"><option value="팀장"><option value="부장"><option value="차장"><option value="과장"><option value="대리"><option value="주임"><option value="연구원"><option value="인턴"></datalist></div>
+      <div><label class="lb">역할</label><input id="eRole" class="form-input" list="roleL"><datalist id="roleL"><option value="관리자"><option value="팀장"><option value="팀원"><option value="인턴"></datalist></div>
+      <div><label class="lb">PIN (로그인 비번)</label><input id="ePin" class="form-input text-center" inputmode="numeric" placeholder="신규=휴대폰뒤4 / 수정=비우면 유지"></div>
+      <div><label class="lb">내선</label><input id="eExt" class="form-input"></div>
+      <div><label class="lb">사무실 전화</label><input id="eTel" class="form-input"></div>
+      <div><label class="lb">휴대폰</label><input id="eMobile" class="form-input" placeholder="010-0000-0000"></div>
+      <div><label class="lb">이메일</label><input id="eEmail" class="form-input"></div>
+    </div>
+    <p class="text-[11px] text-slate-400 font-medium mt-3">※ 휴대폰(또는 PIN)이 로그인 비밀번호로 쓰입니다. 최소 4자리 필요.</p>
+    <div class="flex justify-between items-center mt-6 pt-5 border-t border-slate-100">
+      <button id="delBtn" onclick="del_()" class="text-rose-500 font-bold text-[13px] hover:bg-rose-50 px-4 py-2 rounded-lg">삭제</button>
+      <button onclick="save_()" class="bg-[#0066cc] text-white font-bold text-[13px] px-8 py-3 rounded-lg hover:bg-blue-700 shadow-md">저장</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<style>.lb{ display:block; font-size:10px; font-weight:800; color:#94a3b8; text-transform:uppercase; letter-spacing:.05em; margin:0 0 5px 2px; }</style>
+
+<script src="config.js"></script>
+<script src="common.js"></script>
+<script>
+  if(!AX.requireAuth()){ throw 'no-auth'; }
+  if(!AX.isAdmin()){ document.body.innerHTML='<div style="text-align:center;padding:80px 20px;font-weight:700;color:#64748b">총괄관리자(admin)만 접근할 수 있습니다. <a href="app.html" style="color:#0066cc">보드로</a></div>'; throw 'no-perm'; }
+  const me = AX.user()||{name:'관리자'};
+  let members=[];
+  AX.onStatus(s=>{ const d=document.getElementById('dot'),t=document.getElementById('stat'); d.className='w-2 h-2 rounded-full '+(s.offline?'bg-rose-500':s.pending?'bg-blue-500':'bg-emerald-500'); t.textContent=s.offline?'오프라인 · 대기 '+s.pending:s.pending?'저장 중…':'저장됨'; });
+  AX.onApply((sheet,r)=>{ if(sheet!=='members')return; const i=members.findIndex(m=>m.id===r.id);
+    if(r.status==='applied'){ if(i>-1&&r.serverRow&&!AX.hasPending('members',r.id,r.opId))members[i]=r.serverRow; else if(i>-1&&r.rev!=null)members[i].rev=r.rev; }
+    else if(r.status==='conflict'){ if(r.serverRow){ if(i>-1)members[i]=r.serverRow; else if(r.serverRow.deleted!==true)members.push(r.serverRow); } toast('다른 관리자가 먼저 수정 — 최신본으로 갱신'); render(); }
+    else if(r.status==='error'){ toast('거부: '+(r.error||'')+' — 새로고침합니다.'); init(); } });
+
+  window.onload = init;
+  async function init(){ const res=await AX.pull(['members']); members=(res.data.members||[]).filter(m=>m.deleted!==true); render(); }
+
+  function render(){
+    document.getElementById('memberCount').textContent=`총 ${members.length}명`;
+    const depts=[...new Set(members.map(m=>m.dept).filter(Boolean))];
+    document.getElementById('deptL').innerHTML=depts.map(d=>`<option value="${esc(d)}">`).join('');
+    const grouped={}; members.forEach((m,idx)=>{ const d=m.dept||'(부서 미지정)'; (grouped[d]=grouped[d]||[]).push({m,idx}); });
+    document.getElementById('list').innerHTML=Object.entries(grouped).map(([dept,arr])=>`
+      <div class="mb-4">
+        <div class="flex items-center gap-2 mb-2"><span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">${esc(dept)}</span><span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">${arr.length}명</span><div class="flex-1 h-px bg-slate-200"></div></div>
+        ${arr.map(({m,idx})=>`<div onclick="openEdit(${idx})" class="bg-white border border-slate-200 rounded-xl px-5 py-3 mb-1.5 grid grid-cols-[60px_1fr_100px_1fr_28px] items-center gap-3 cursor-pointer hover:border-sky-300 transition">
+          <div class="text-[11px] font-bold text-slate-400 text-center">${esc(m.rank||'')}</div>
+          <div class="text-[14px] font-black text-slate-800">${esc(m.name||'')} ${m.abbr?`<span class="text-[10px] font-black bg-slate-900 text-white px-1.5 py-0.5 rounded ml-1">${esc(m.abbr)}</span>`:''}</div>
+          <div class="text-[11px] font-bold text-slate-400">${esc(m.role||'')}</div>
+          <div class="text-[12px] font-semibold text-blue-500 truncate">${esc(m.email||'')}</div>
+          <div class="text-right opacity-30"><span class="ms text-[18px]">edit_note</span></div>
+        </div>`).join('')}
+      </div>`).join('') || '<div class="text-center text-slate-400 py-16 font-bold">등록된 멤버가 없습니다.</div>';
+  }
+
+  function openEdit(idx){
+    document.getElementById('eIdx').value=idx;
+    document.getElementById('delBtn').style.display=idx===-1?'none':'inline-block';
+    const m = idx===-1?{}:members[idx];
+    document.getElementById('eId').value=m.id||''; document.getElementById('eRev').value=m.rev||0;
+    ['Name','Abbr','Dept','Rank','Role','Ext','Tel','Mobile','Email','Pin'].forEach(k=>{ document.getElementById('e'+k).value=m[k.toLowerCase()]||''; });
+    document.getElementById('modal').classList.add('active');
+  }
+  function close_(){ document.getElementById('modal').classList.remove('active'); }
+  function save_(){
+    const idx=+document.getElementById('eIdx').value;
+    const name=document.getElementById('eName').value.trim();
+    if(!name) return toast('성명은 필수입니다.');
+    const fields={ name, abbr:v('eAbbr'), dept:v('eDept'), rank:v('eRank'), role:v('eRole'), ext:v('eExt'), tel:v('eTel'), mobile:v('eMobile'), email:v('eEmail') };
+    const pinVal=v('ePin'); if(pinVal) fields.pin=pinVal;   // 비우면 기존 PIN 유지(덮어쓰지 않음)
+    const id = document.getElementById('eId').value || ('M-'+AX.uuid());
+    const rev = idx===-1?0:(+document.getElementById('eRev').value||0);
+    if(idx===-1){ members.push(Object.assign({id,rev:0,deleted:false},fields)); }
+    else { Object.assign(members[idx], fields); }
+    AX.enqueue({ sheet:'members', type:'upsert', id, baseRev:rev, fields });
+    close_(); render();
+  }
+  function del_(){
+    const idx=+document.getElementById('eIdx').value; if(idx<0) return;
+    const m=members[idx];
+    if(!confirm(`'${m.name}' 멤버를 삭제하시겠습니까? (소프트 삭제)`)) return;
+    AX.enqueue({ sheet:'members', type:'delete', id:m.id, baseRev:+m.rev||0, fields:{} });
+    members.splice(idx,1); close_(); render();
+  }
+  function v(id){ return document.getElementById(id).value.trim(); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600); }
+</script>
+</body>
+</html>

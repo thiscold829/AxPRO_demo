@@ -22,6 +22,8 @@
   .scope{ display:inline-flex; background:#e7eaf1; border-radius:9px; padding:3px; gap:2px; }
   .scope button{ background:transparent; color:var(--muted); font-size:12.5px; font-weight:800; padding:6px 14px; border-radius:7px; }
   .scope button.on{ background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .scopeleft{ display:flex; width:100%; gap:3px; margin-bottom:12px; }
+  .scopeleft button{ flex:1; padding:9px 0; font-size:13px; }
   .pill{ display:flex; align-items:center; gap:6px; font-size:11.5px; font-weight:800; color:var(--muted); background:#f1f3f7; border-radius:8px; padding:6px 11px; }
   .pdot{ width:8px; height:8px; border-radius:50%; background:var(--done); } .pdot.blue{ background:var(--prog); } .pdot.rose{ background:var(--prob); } .pdot.amber{ background:var(--hold); }
   .pdot.blue{ animation:pulse 1s infinite; } @keyframes pulse{ 50%{opacity:.4;} }
@@ -99,8 +101,9 @@
   table.rep-grid .assign{ font-weight:600; color:#3a3f4a; } table.rep-grid .idle{ color:var(--muted); font-weight:600; font-size:11px; }
   @media (prefers-color-scheme:dark){ table.rep-grid .rowlbl{ background:#20242e; color:#c7ccd6; } table.rep-grid tr.head th{ background:rgba(0,102,204,.16); } }
 
-  .mgrbar{ flex:none; background:#fff; border-bottom:1px solid var(--line); padding:12px 22px; display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
-  .mgrbar .g{ display:flex; align-items:center; gap:8px; } .mgrbar .lbl{ font-size:10.5px; font-weight:900; color:var(--muted); letter-spacing:.06em; }
+  .mgrbar{ flex:none; background:#fff; border-bottom:1px solid var(--line); padding:0 22px; height:62px; display:flex; align-items:center; gap:18px; flex-wrap:nowrap; overflow-x:auto; overflow-y:hidden; }
+  .mgrbar::-webkit-scrollbar{ height:0; }
+  .mgrbar .g{ display:flex; align-items:center; gap:8px; flex:none; } .mgrbar .lbl{ font-size:10.5px; font-weight:900; color:var(--muted); letter-spacing:.06em; white-space:nowrap; }
   .mgrseg{ display:inline-flex; background:#eef1f6; border-radius:9px; padding:3px; gap:2px; }
   .mgrseg button{ background:transparent; color:var(--muted); font-size:12.5px; font-weight:800; padding:7px 14px; border-radius:7px; }
   .mgrseg button.on{ background:#fff; color:var(--ink); box-shadow:0 1px 2px rgba(0,0,0,.08); }
@@ -130,7 +133,7 @@
     .col.left{ border-right:0; border-bottom:1px solid var(--line); }
     .col.right{ border-left:0; border-top:1px solid var(--line); }
     .topbar{ flex-wrap:wrap; gap:8px 12px; }
-    .mgrbar{ gap:10px 14px; }
+    .mgrbar{ padding:0 16px; gap:14px; }   /* 좁은 화면에서도 62px 단일 행 유지 + 가로 스크롤(줄바꿈으로 세로 비대해지는 것 방지) */
     .mgrbody{ padding:14px; } .mgr-sheet{ padding:16px; }
   }
 </style>
@@ -143,10 +146,6 @@
   <span class="brand">AxPRO</span>
   <span class="today" id="todayLbl"></span>
   <span class="grow"></span>
-  <span id="scopeWrap" class="scope">
-    <button class="on" onclick="setScope('일간',this)">일간</button>
-    <button onclick="setScope('주간',this)">주간</button>
-  </span>
   <button id="modeBtn" onclick="toggleMode()" style="display:none;background:#151a22;color:#fff;font-size:12.5px;font-weight:800;padding:8px 15px;border-radius:9px;display:none;align-items:center;gap:6px"></button>
   <span class="pill" id="statusPill"><span class="pdot" id="pdot"></span><span id="statusText">저장됨</span></span>
   <span class="who" id="whoLbl"></span>
@@ -157,8 +156,12 @@
 <!-- 팀원 화면 -->
 <div class="stage" id="memberStage" style="display:none">
   <div class="col left">
+    <div id="scopeWrap" class="scope scopeleft">
+      <button class="on" onclick="setScope('일간',this)">일간 업무</button>
+      <button onclick="setScope('주간',this)">주간 업무</button>
+    </div>
     <div class="dl"><span class="ms" style="font-size:16px">edit_note</span> 업무 기록 — 적으면 진행현황·일일보고 동시 완성</div>
-    <div class="frow fld"><div><label>사업</label><select id="fProj" class="fi"></select></div><div><label>마감일</label><input id="fDdl" type="date" class="fi"></div></div>
+    <div class="frow fld"><div><label>사업</label><select id="fProj" class="fi" onchange="this.title=(this.selectedOptions[0]||{}).title||''"></select></div><div><label>마감일</label><input id="fDdl" type="date" class="fi"></div></div>
     <div class="fld"><label>세부내용</label><input id="fCont" class="fi" placeholder="수행/예정 업무 (Enter)" onkeypress="if(event.key==='Enter')addEntry()"></div>
     <div class="fld"><label>비고</label><input id="fNote" class="fi" placeholder="from/to, > 후속 등 (선택)"></div>
     <div class="fld"><label>진행상태</label><div class="stseg" id="fSt"></div></div>
@@ -214,10 +217,12 @@
 <script>
   if (!AX.requireAuth()) { throw new Error('로그인 필요 — index.html 로 이동'); }
   const currentUser = AX.user() || { name:'', dept:'', rank:'', manager:false };
-  const isManager = !!currentUser.manager;
+  // 총괄관리자 = role/직급에 '(admin)' 표기(또는 '관리자'). (admin) 만 설정(과제·구성원) 접근
+  const isAdmin = !!currentUser.admin || /\(admin\)|관리자/i.test(String(currentUser.role||'')+' '+String(currentUser.rank||''));
+  const isManager = !!currentUser.manager || isAdmin;           // 팀장 이상(+총괄관리자) → 업무관리·전체 편집
   const ME = currentUser.name;
-  const role = isManager ? 'manager' : 'member';
-  if (isManager) document.getElementById('adminLink').style.display='';
+  const role = isAdmin ? 'admin' : (isManager ? 'manager' : 'member');
+  if (isAdmin) document.getElementById('adminLink').style.display='';
 
   function pad(n){return(n<10?'0':'')+n;}
   function today(){var d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -284,7 +289,8 @@
     const fp=document.getElementById('fProj');
     if(!ps.length){ fp.innerHTML='<option value="">등록된 과제 없음 — 관리자에게 요청</option>'; document.getElementById('addBtn').disabled=true; }
     else { const teams=[...new Set(ps.map(p=>p.team||'기타'))];
-      fp.innerHTML=teams.map(tm=>'<optgroup label="'+esc(tm)+'">'+ps.filter(p=>(p.team||'기타')===tm).map(p=>`<option value="${esc(p.short_name)}">${esc(p.short_name)} — ${esc(p.full_name||'')}</option>`).join('')+'</optgroup>').join(''); }
+      fp.innerHTML=teams.map(tm=>'<optgroup label="'+esc(tm)+'">'+ps.filter(p=>(p.team||'기타')===tm).map(p=>`<option value="${esc(p.short_name)}" title="${esc(p.full_name||'')}">${esc(p.short_name)}</option>`).join('')+'</optgroup>').join(''); }
+    fp.title=(fp.selectedOptions[0]||{}).title||'';   // 닫힌 상태에서도 선택된 사업 풀네임을 마우스오버로
     document.getElementById('fSt').innerHTML=STATUS.map(s=>`<button data-s="${s}" onclick="pickSt('${s}',this)" style="color:${STCOLOR[s]}">${s}</button>`).join('');
     document.getElementById('fPg').innerHTML=[0,25,50,75,100].map(v=>`<button data-p="${v}" onclick="pickPg(${v},this)">${v}</button>`).join('');
     document.getElementById('fDdl').value=defDdl();
@@ -297,15 +303,15 @@
     const mine = mode==='내업무';
     document.getElementById('memberStage').style.display=mine?'grid':'none';
     document.getElementById('managerStage').style.display=mine?'none':'grid';
-    document.getElementById('scopeWrap').style.display=mine?'inline-flex':'none';
+    document.getElementById('scopeWrap').style.display=mine?'flex':'none';
     document.getElementById('whoLbl').textContent=`${currentUser.dept||''} ${ME} ${currentUser.rank||''}`.trim();
-    if(isManager) document.getElementById('modeBtn').innerHTML = mine?'<span class="ms" style="font-size:16px">groups</span> 팀 관리':'<span class="ms" style="font-size:16px">arrow_back</span> 내 업무';
+    if(isManager) document.getElementById('modeBtn').innerHTML = mine?'<span class="ms" style="font-size:16px">groups</span> 업무관리':'<span class="ms" style="font-size:16px">arrow_back</span> 내 업무';
     syncToggles();
     upTitle(); mine?renderMember():renderManager();
     saveView();
   }
   function toggleMode(){ mode=mode==='내업무'?'관리':'내업무'; applyMode(); }
-  function upTitle(){ document.getElementById('todayLbl').innerHTML=(mode==='관리'?'팀 관리':'내 업무')+' <span class="g">· '+(mode==='관리'?'':scope+' · ')+TODAY.replace(/-/g,'.')+'</span>'; }
+  function upTitle(){ document.getElementById('todayLbl').innerHTML=(mode==='관리'?'업무관리':'내 업무')+' <span class="g">· '+(mode==='관리'?'':scope+' · ')+TODAY.replace(/-/g,'.')+'</span>'; }
   function setScope(v,b){ scope=v; document.querySelectorAll('#scopeWrap button').forEach(x=>x.classList.remove('on')); if(b)b.classList.add('on'); document.getElementById('kindLbl').textContent=v; if(!editingId)document.getElementById('fDdl').value=defDdl(); upTitle(); renderMember(); saveView(); }
   function pickSt(s,b){ form.status=s; document.querySelectorAll('#fSt button').forEach(x=>{x.classList.remove('on');x.style.background='';}); b.classList.add('on'); b.style.background=STCOLOR[s]+'22'; if(s==='완료'){form.progress=100;syncPg();} }
   function pickPg(v,b){ form.progress=v; syncPg(); }

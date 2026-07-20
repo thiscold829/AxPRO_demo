@@ -106,7 +106,7 @@
       if (res && res.ok) { location.replace('app.html'); }
       else { showError((res && res.error) || '로그인 실패'); }
     } catch (e) {
-      showError('서버 연결 실패 — API_URL 설정 또는 네트워크를 확인하세요.');
+      showError("서버 연결 실패(CORS/네트워크) — Apps Script 배포의 '액세스'를 '모든 사용자'로 설정했는지, 코드 수정 후 '새 버전'으로 재배포했는지 확인하세요.");
       console.error(e);
     }
   }

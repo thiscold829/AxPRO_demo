@@ -34,6 +34,8 @@
   function token() { return sessionStorage.getItem(LS.token) || ''; }
   function user()  { try { return JSON.parse(sessionStorage.getItem(LS.user) || 'null'); } catch (e) { return null; } }
   function isManager() { var u = user(); return !!(u && u.manager); }
+  // 총괄관리자 = role/직급에 '(admin)' 표기(또는 '관리자'). 설정(과제·구성원) 접근 전용
+  function isAdmin() { var u = user(); return !!(u && (u.admin || /\(admin\)|관리자/i.test(String(u.role||'') + ' ' + String(u.rank||'')))); }
 
   // ── 저수준 fetch (text/plain 단순요청 → 프리플라이트 회피) ──
   function post(bodyObj, timeoutMs) {
@@ -194,7 +196,7 @@
   global.AX = {
     configured: CONFIGURED,
     login: login, logout: logout, requireAuth: requireAuth,
-    user: user, isManager: isManager, token: token,
+    user: user, isManager: isManager, isAdmin: isAdmin, token: token,
     pull: pull, enqueue: enqueue, drain: drain, onApply: onApply,
     hasPending: function (sheet, id, exceptOpId) { return readOutbox().some(function (o) { return o.sheet === sheet && o.id === id && o.opId !== exceptOpId; }); },
     onStatus: function (cb) { statusListeners.push(cb); cb(Object.assign({}, STATE)); },
