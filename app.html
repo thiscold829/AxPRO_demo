@@ -4,13 +4,12 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>AxPRO | 업무보고·진행현황</title>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
 <style>
   :root{ --brand:#0066cc; --ink:#151a22; --muted:#8a909c; --line:#e7e9ef; --bg:#f2f4f8; --card:#fff;
     --wait:#94a0b0; --prog:#0066cc; --prob:#ef3e36; --hold:#f59e0b; --done:#22b573; }
   *{ box-sizing:border-box; }
   body{ margin:0; font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; height:100vh; overflow:hidden; display:flex; flex-direction:column; }
-  .ms{ font-family:'Material Symbols Outlined'; vertical-align:middle; line-height:1; }
+  .ic{ display:inline-block; vertical-align:-.18em; width:18px; height:18px; flex:none; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
   button{ font-family:inherit; cursor:pointer; border:0; }
   a{ text-decoration:none; color:inherit; }
 
@@ -52,7 +51,7 @@
   .ptag{ font-size:12px; font-weight:900; color:var(--brand); background:#eaf2fd; padding:3px 10px; border-radius:7px; } .pgrp-h .pf{ font-size:11px; color:var(--muted); font-weight:600; }
   .erow{ display:flex; align-items:center; gap:9px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:9px 11px; margin-bottom:5px; }
   .erow.done{ opacity:.6; }
-  .check{ width:20px;height:20px;border-radius:50%;border:2px solid #d2d2d7;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer; } .check .ms{font-size:13px;opacity:0;} .check.done{background:var(--brand);border-color:var(--brand);} .check.done .ms{opacity:1;}
+  .check{ width:20px;height:20px;border-radius:50%;border:2px solid #d2d2d7;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer; } .check .ic{width:12px;height:12px;opacity:0;} .check.done{background:var(--brand);border-color:var(--brand);} .check.done .ic{opacity:1;}
   .econt{ flex:1; font-size:13px; font-weight:600; min-width:0; cursor:pointer; } .erow.done .econt{ text-decoration:line-through; color:#b0b6c0; }
   .enote{ font-size:11px; color:var(--muted); font-weight:500; }
   .emeta{ display:flex; align-items:center; gap:6px; flex:none; }
@@ -139,6 +138,16 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></symbol>
+  <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+  <symbol id="i-edit_note" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="i-content_copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-groups" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+  <symbol id="i-arrow_back" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+</defs></svg>
 
 <div id="offlineBanner" class="hidden" style="display:none"></div>
 
@@ -149,8 +158,8 @@
   <button id="modeBtn" onclick="toggleMode()" style="display:none;background:#151a22;color:#fff;font-size:12.5px;font-weight:800;padding:8px 15px;border-radius:9px;display:none;align-items:center;gap:6px"></button>
   <span class="pill" id="statusPill"><span class="pdot" id="pdot"></span><span id="statusText">저장됨</span></span>
   <span class="who" id="whoLbl"></span>
-  <a id="adminLink" href="settings.html" class="iconbtn" title="조직·과제 관리" style="display:none"><span class="ms" style="font-size:19px">settings</span></a>
-  <button class="iconbtn" title="로그아웃" onclick="AX.logout();location.replace('index.html')"><span class="ms" style="font-size:18px">logout</span></button>
+  <a id="adminLink" href="settings.html" class="iconbtn" title="조직·과제 관리" style="display:none"><svg class="ic" style="width:19px;height:19px"><use href="#i-settings"/></svg></a>
+  <button class="iconbtn" title="로그아웃" onclick="AX.logout();location.replace('index.html')"><svg class="ic"><use href="#i-logout"/></svg></button>
 </div>
 
 <!-- 팀원 화면 -->
@@ -160,9 +169,9 @@
       <button class="on" onclick="setScope('일간',this)">일간 업무</button>
       <button onclick="setScope('주간',this)">주간 업무</button>
     </div>
-    <div class="dl"><span class="ms" style="font-size:16px">edit_note</span> 업무 기록 — 적으면 진행현황·일일보고 동시 완성</div>
+    <div class="dl"><svg class="ic" style="width:15px;height:15px"><use href="#i-edit_note"/></svg> 업무 기록 — 적으면 진행현황·일일보고 동시 완성</div>
     <div class="frow fld"><div><label>사업</label><select id="fProj" class="fi" onchange="this.title=(this.selectedOptions[0]||{}).title||''"></select></div><div><label>마감일</label><input id="fDdl" type="date" class="fi"></div></div>
-    <div class="fld"><label>세부내용</label><input id="fCont" class="fi" placeholder="수행/예정 업무 (Enter)" onkeypress="if(event.key==='Enter')addEntry()"></div>
+    <div class="fld"><label>세부내용</label><input id="fCont" class="fi" placeholder="수행 또는 예정 업무 (Enter로 추가)" onkeypress="if(event.key==='Enter')addEntry()"></div>
     <div class="fld"><label>비고</label><input id="fNote" class="fi" placeholder="from/to, > 후속 등 (선택)"></div>
     <div class="fld"><label>진행상태</label><div class="stseg" id="fSt"></div></div>
     <div class="fld"><label>진행도</label><div class="progseg" id="fPg"></div></div>
@@ -178,7 +187,7 @@
       <button onclick="setRTab('주간',this)">주간 진행현황</button>
     </div>
     <div class="rbody" id="mRBody"></div>
-    <button id="mCopyBtn" class="copybtn" onclick="copyReport('member')"><span class="ms" style="font-size:16px">content_copy</span> 이행내용 복사</button>
+    <button id="mCopyBtn" class="copybtn" onclick="copyReport('member')"><svg class="ic" style="width:15px;height:15px"><use href="#i-content_copy"/></svg> 이행내용 복사</button>
   </div>
 </div>
 
@@ -229,7 +238,11 @@
   function weekMon(){var d=new Date();var D=(d.getDay()+6)%7;d.setDate(d.getDate()-D);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
   const TODAY=today();
   function ddlShort(d){ if(!d) return ''; return String(d).length>=10 ? String(d).slice(5).replace('-','.') : String(d); }
-  function memTeam(name){ const m=rawData.members.find(x=>x.name===name); return (m&&(m.dept||'').includes('환경'))?'환경AX':'식품AX'; }
+  // AxPRO 범위 = PE실(PEO)만. dept 로 다른 실(PS/PM)은 제외 → null. 범위 안에서 식품/환경/PEO(실장) 분류
+  const OTHER_SIL=/PSO|PS실|PS팀|PMO|PM실|PM1|PM2|VibeX|사업지원|사업관리/i;
+  function memTeam(name){ const m=rawData.members.find(x=>x.name===name); const d=(m&&m.dept||''); if(OTHER_SIL.test(d)) return null; return d.includes('환경')?'환경AX':(d.includes('식품')?'식품AX':'PEO'); }
+  const TEAM_ORDER={ 'PEO':0, '식품AX':1, '환경AX':2 };   // 엑셀 열 순서: PEO · 식품AX · 환경AX
+  function teamSort(a,b){ return (TEAM_ORDER[a]==null?9:TEAM_ORDER[a])-(TEAM_ORDER[b]==null?9:TEAM_ORDER[b]); }
   function projBy(short){ return rawData.projects.find(p=>p.short_name===short)||{}; }
 
   const STATUS=['대기','진행중','완료','보류','문제발생'];
@@ -263,18 +276,34 @@
   });
 
   window.onload = init;
-  async function init(){
-    let res;
-    try{ res=await AX.pull(['entries','projects','members']); }catch(e){ res={data:{},fromCache:true,hasCache:false}; toast('불러오기 실패 — 잠시 후 새로고침'); }
-    rawData.entries=(res.data.entries||[]).filter(nd).map(normE);
-    rawData.projects=(res.data.projects||[]).filter(nd).sort((a,b)=>(+a.order||999)-(+b.order||999));
-    rawData.members=(res.data.members||[]).filter(nd);
-    if(res.fromCache&&!res.hasCache) toast('연결 실패 — 표시할 캐시가 없습니다.');
+  let mounted=false;
+  function applyData(data){
+    rawData.entries=(data.entries||[]).filter(nd).map(normE);
+    rawData.projects=(data.projects||[]).filter(nd).sort((a,b)=>(+a.order||999)-(+b.order||999));
+    rawData.members=(data.members||[]).filter(nd);
+  }
+  function mountUI(){
     setupForm();
-    restoreView();
-    if(mTeam===null) mTeam = isChief ? '전체' : (memTeam(ME).includes('환경')?'환경':'식품');
+    if(!mounted){ restoreView(); mTeam = '전체'; mounted=true; }   // 관리 진입 기본값=무조건 전체(식품/환경은 옵션)
     document.getElementById('modeBtn').style.display = isManager?'inline-flex':'none';
     applyMode();
+  }
+  // 입력 중이 아니면 폼도 갱신, 아니면 데이터·보드만 갱신(사용자 입력 보존)
+  function refreshUI(){
+    const a=document.activeElement;
+    const busy = editingId || document.getElementById('fCont').value.trim() || (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName));
+    if(!busy) setupForm();
+    applyMode();
+  }
+  async function init(){
+    // 1) 캐시 즉시 렌더 — 네트워크를 기다리지 않고 화면 먼저 (반복 접속 시 즉시 표시)
+    const c=AX.cached(['entries','projects','members']);
+    if(c.hasCache){ applyData(c.data); mountUI(); }
+    // 2) 백그라운드로 최신본 받아 갱신
+    let res;
+    try{ res=await AX.pull(['entries','projects','members']); }catch(e){ res={data:{},fromCache:true,hasCache:false}; }
+    if(!res.fromCache){ applyData(res.data); c.hasCache?refreshUI():mountUI(); }   // 네트워크 성공 → 최신본 반영
+    else if(!c.hasCache){ applyData(res.data); mountUI(); if(!res.hasCache) toast('연결 실패 — 표시할 캐시가 없습니다.'); }  // 캐시·네트워크 모두 없음
     AX.drain();
   }
   function nd(r){ return r.deleted!==true && r.deleted!=='TRUE'; }
@@ -305,7 +334,7 @@
     document.getElementById('managerStage').style.display=mine?'none':'grid';
     document.getElementById('scopeWrap').style.display=mine?'flex':'none';
     document.getElementById('whoLbl').textContent=`${currentUser.dept||''} ${ME} ${currentUser.rank||''}`.trim();
-    if(isManager) document.getElementById('modeBtn').innerHTML = mine?'<span class="ms" style="font-size:16px">groups</span> 업무관리':'<span class="ms" style="font-size:16px">arrow_back</span> 내 업무';
+    if(isManager) document.getElementById('modeBtn').innerHTML = mine?'<svg class="ic" style="width:16px;height:16px"><use href="#i-groups"/></svg> 업무관리':'<svg class="ic" style="width:16px;height:16px"><use href="#i-arrow_back"/></svg> 내 업무';
     syncToggles();
     upTitle(); mine?renderMember():renderManager();
     saveView();
@@ -337,7 +366,6 @@
   }
   function patchEntry(id,ch){
     const i=rawData.entries.findIndex(x=>x.id===id); if(i<0)return;
-    if(!isManager && rawData.entries[i].member!==ME) return toast('본인 업무만 수정할 수 있습니다.');
     const prev=JSON.parse(JSON.stringify(rawData.entries[i]));
     const baseRev=+rawData.entries[i].rev||0;
     if(ch.status==='완료' && ch.progress==null) ch.progress=100;
@@ -348,7 +376,7 @@
   }
   function toggleDone(id){ const t=rawData.entries.find(x=>x.id===id); patchEntry(id, t.status==='완료'?{status:'진행중'}:{status:'완료',progress:100}); }
   function editEntry(id){   // 왼쪽 입력폼을 그 업무로 채워 전 항목(상태·진행도·마감일·비고·사업) 수정
-    const t=rawData.entries.find(x=>x.id===id); if(!t)return; if(!isManager&&t.member!==ME) return toast('본인 업무만 수정 가능');
+    const t=rawData.entries.find(x=>x.id===id); if(!t)return;
     editingId=id;
     if(t.kind!==scope){ const b=document.querySelector('#scopeWrap button[onclick*="\''+t.kind+'\'"]'); if(b) setScope(t.kind,b); }
     document.getElementById('fProj').value=t.project;
@@ -370,7 +398,7 @@
     renderMyBoard();
   }
   function deleteEntry(id){
-    const t=rawData.entries.find(x=>x.id===id); if(!t)return; if(!isManager&&t.member!==ME) return toast('본인 업무만 삭제 가능');
+    const t=rawData.entries.find(x=>x.id===id); if(!t)return;
     if(!confirm('이 업무를 삭제할까요? (복구 가능한 소프트 삭제)')) return;
     const i=rawData.entries.findIndex(x=>x.id===id); const prev=JSON.parse(JSON.stringify(t));
     const opId=AX.enqueue({sheet:'entries',type:'delete',id,baseRev:+t.rev||0,fields:{}});
@@ -392,9 +420,9 @@
       h+=`<div class="pgrp"><div class="pgrp-h"><span class="ptag">${esc(p.short_name)}</span><span class="pf">${esc(p.full_name||'')}</span></div>`;
       its.forEach(t=>{ const done=t.status==='완료'; const od=t.deadline&&String(t.deadline).length>=10&&t.deadline<TODAY&&!done;
         h+=`<div class="erow ${done?'done':''} ${t.id===editingId?'editing':''}">
-          <div class="check ${done?'done':''}" onclick="toggleDone('${t.id}')"><span class="ms">check</span></div>
+          <div class="check ${done?'done':''}" onclick="toggleDone('${t.id}')"><svg class="ic"><use href="#i-check"/></svg></div>
           <span class="econt" onclick="editEntry('${t.id}')">${esc(t.content)}${t.note?` <span class="enote">(${esc(t.note)})</span>`:''}</span>
-          <span class="emeta">${t.deadline?`<span class="ddl${od?' overdue':''}">~${ddlShort(t.deadline)}</span>`:''}<span class="prog-mini">${t.progress}%</span><span class="stbadge" style="color:${STCOLOR[t.status]};background:${STBG[t.status]}">${t.status}</span><span class="edel ms" onclick="event.stopPropagation();deleteEntry('${t.id}')" title="삭제">close</span></span></div>`;
+          <span class="emeta">${t.deadline?`<span class="ddl${od?' overdue':''}">~${ddlShort(t.deadline)}</span>`:''}<span class="prog-mini">${t.progress}%</span><span class="stbadge" style="color:${STCOLOR[t.status]};background:${STBG[t.status]}">${t.status}</span><svg class="ic edel" style="width:14px;height:14px" onclick="event.stopPropagation();deleteEntry('${t.id}')"><title>삭제</title><use href="#i-close"/></svg></span></div>`;
       });
       h+=`</div>`;
     });
@@ -411,12 +439,12 @@
   function renderManager(){ upTitle();
     document.getElementById('mgrGroupWrap').style.display = mView==='보고'?'none':'flex';
     document.getElementById('mgrRepWrap').style.display = mView==='보고'?'flex':'none';
-    const teamMembers=rawData.members.filter(m=>mTeam==='전체'||memTeam(m.name).indexOf(mTeam)===0).map(m=>m.name);
+    const teamMembers=rawData.members.filter(m=>{ const t=memTeam(m.name); return t!==null && (mTeam==='전체'||t.indexOf(mTeam)===0); }).map(m=>m.name);
     const title = mView==='보고'?'일일 업무보고':mView==='일간'?'일일 업무진행현황':'주간 업무진행현황';
     const teamLbl = mTeam==='전체'?'식품AX+환경AX':mTeam+'AX';
     const sub = TODAY.replace(/-/g,'.')+' · '+teamLbl+(mView==='보고'?' · '+mRep:' · '+mGroup);
     const bodyHtml = mView==='보고' ? (mRep==='팀별'?reportTeamGrid(teamMembers):reportPersonGrid(teamMembers)) : statusTable(mView,mGroup,teamMembers);
-    const copyBtn = mView==='보고' ? `<button class="mgr-copy" onclick="copyReport('manager')"><span class="ms" style="font-size:15px">content_copy</span> 이행내용 복사</button>` : '';
+    const copyBtn = mView==='보고' ? `<button class="mgr-copy" onclick="copyReport('manager')"><svg class="ic" style="width:14px;height:14px"><use href="#i-content_copy"/></svg> 이행내용 복사</button>` : '';
     document.getElementById('mgrSheet').innerHTML=copyBtn+`<div class="mgr-title">${title}</div><div class="mgr-sub">${esc(sub)}</div>${bodyHtml}`;
   }
   function setMView(v,b){ mView=v; document.querySelectorAll('#mgrView button').forEach(x=>x.classList.remove('on'));b.classList.add('on'); renderManager(); saveView(); }
@@ -470,7 +498,8 @@
 
   // ---- 사람별: 엑셀 2번째 시트(사람=열, 행=담당과제/이행내용/미진행) ----
   function reportPersonGrid(memberNames){
-    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))];
+    // 엑셀 'AX 일일 업무보고'(사람별)은 식품AX·환경AX 팀만, 실장(PEO)은 없음
+    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))].filter(t=>t&&t!=='PEO').sort(teamSort);
     let html='';
     teams.forEach(tm=>{
       const ppl=rawData.members.filter(m=>memTeam(m.name)===tm && memberNames.includes(m.name));
@@ -489,24 +518,25 @@
 
   // ---- 팀별: 엑셀 1번째 시트(팀=열, 이행내용에 [담당자] 표기) ----
   function reportTeamGrid(memberNames){
-    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))];
+    const teams=[...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))].filter(Boolean).sort(teamSort);
     if(!teams.length) return `<div class="rep-none">기록이 없습니다.</div>`;
     const teamCell=(tm)=>{
       const te=rawData.entries.filter(t=>t.kind==='일간'&&memTeam(t.member)===tm&&memberNames.includes(t.member));
       const byP={}; te.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
       if(!Object.keys(byP).length) return '<span class="idle">진행사항 없음</span>';
+      const multi = new Set(te.map(t=>t.member)).size > 1;   // 엑셀: 한 사람뿐인 열(PEO 등)은 약어 생략
       let s='';
       rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{
         s+=`<span class="cellproj">[${esc(p.short_name)}]</span>`;
         const byM={}; byP[p.short_name].forEach(t=>{(byM[t.member]=byM[t.member]||[]).push(t);});
         Object.keys(byM).forEach(mn=>{
-          s+=`<span class="cellabbr">[${esc(abbrOf(mn))}]</span>`;   // 엑셀: 사업 아래 약어별로
+          if(multi) s+=`<span class="cellabbr">[${esc(abbrOf(mn))}]</span>`;   // 여러 명일 때만 사업 아래 약어별로
           byM[mn].forEach(t=>{ s+=`<div class="cellline">- ${esc(t.content)}${t.note?` <span class="nt">(${esc(t.note)})</span>`:''}</div>`; });
         });
       });
       return s;
     };
-    const lead=(tm)=>{ const l=rawData.members.find(m=>memTeam(m.name)===tm && /팀장|실장/.test(m.rank||'')); return l?`<span class="rk">${esc(l.name)} ${esc(l.rank)}</span>`:''; };
+    const lead=(tm)=>{ const inT=rawData.members.filter(m=>memTeam(m.name)===tm); const l=inT.find(m=>/팀장/.test(m.rank||''))||inT.find(m=>/실장/.test(m.rank||'')); return l?`<span class="rk">${esc(l.name)} ${esc(l.rank)}</span>`:''; };
     const idleTeam=(tm)=>{ const ppl=rawData.members.filter(m=>memTeam(m.name)===tm&&memberNames.includes(m.name)); const all=[...new Set(rawData.entries.filter(t=>ppl.some(m=>m.name===t.member)).map(t=>t.project))]; const td=[...new Set(rawData.entries.filter(t=>ppl.some(m=>m.name===t.member)&&t.kind==='일간').map(t=>t.project))]; return all.filter(p=>!td.includes(p)); };
     let html=`<table class="rep-grid"><colgroup><col style="width:78px">${teams.map(()=>'<col>').join('')}</colgroup>`;
     html+=`<tr class="head"><th></th>${teams.map(tm=>`<th>${esc(tm)}<br>${lead(tm)}</th>`).join('')}</tr>`;
@@ -520,12 +550,13 @@
   function buildIhaeng(memberNames, mgr){
     let txt='';
     if(mgr && mRep==='팀별'){
-      [...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))].forEach(tm=>{ txt+='['+tm+']\n';
+      [...new Set(rawData.members.filter(m=>memberNames.includes(m.name)).map(m=>memTeam(m.name)))].sort(teamSort).forEach(tm=>{ txt+='['+tm+']\n';
         const te=rawData.entries.filter(t=>t.kind==='일간'&&memTeam(t.member)===tm&&memberNames.includes(t.member));
         const byP={}; te.forEach(t=>{(byP[t.project]=byP[t.project]||[]).push(t);});
+        const multi = new Set(te.map(t=>t.member)).size > 1;
         rawData.projects.filter(p=>byP[p.short_name]).forEach(p=>{ txt+='['+p.short_name+']\n';
           const byM={}; byP[p.short_name].forEach(t=>{(byM[t.member]=byM[t.member]||[]).push(t);});
-          Object.keys(byM).forEach(mn=>{ txt+='['+abbrOf(mn)+']\n'; byM[mn].forEach(t=>{ txt+='- '+t.content+(t.note?' ('+t.note+')':'')+'\n'; }); }); });
+          Object.keys(byM).forEach(mn=>{ if(multi) txt+='['+abbrOf(mn)+']\n'; byM[mn].forEach(t=>{ txt+='- '+t.content+(t.note?' ('+t.note+')':'')+'\n'; }); }); });
         txt+='\n'; });
     } else {
       memberNames.filter(nm=>rawData.entries.some(t=>t.member===nm&&t.kind==='일간')).forEach(nm=>{

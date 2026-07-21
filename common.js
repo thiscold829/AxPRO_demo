@@ -101,6 +101,18 @@
       });
   }
 
+  // 마지막 정상본 캐시를 동기적으로 즉시 반환 (네트워크 대기 없이 화면 먼저 그리기)
+  function cached(sheets) {
+    sheets = sheets || ['entries', 'projects', 'members'];
+    var data = {}, has = false;
+    sheets.forEach(function (s) {
+      var raw = localStorage.getItem(LS.cache + s);
+      if (raw) { try { data[s] = JSON.parse(raw); has = true; } catch (_) { data[s] = []; } }
+      else { data[s] = []; }
+    });
+    return { data: data, hasCache: has };
+  }
+
   // ── 쓰기 (아웃박스) ──────────────────────────────────────────
   function uuid() {
     if (global.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -197,7 +209,7 @@
     configured: CONFIGURED,
     login: login, logout: logout, requireAuth: requireAuth,
     user: user, isManager: isManager, isAdmin: isAdmin, token: token,
-    pull: pull, enqueue: enqueue, drain: drain, onApply: onApply,
+    pull: pull, cached: cached, enqueue: enqueue, drain: drain, onApply: onApply,
     hasPending: function (sheet, id, exceptOpId) { return readOutbox().some(function (o) { return o.sheet === sheet && o.id === id && o.opId !== exceptOpId; }); },
     onStatus: function (cb) { statusListeners.push(cb); cb(Object.assign({}, STATE)); },
     state: function () { return Object.assign({}, STATE); },
